@@ -53,7 +53,7 @@ if (status.trim()) {
       runCmd('git push -u origin main');
     }
   } catch (e) {
-    console.warn('⚠️ ไม่พบ Remote 'origin' ของ GitHub — กรุณาพิมพ์สั่งเชื่อมต่อ Remote ก่อน เพื่อผลักดันโค้ดขึ้น GitHub');
+    console.warn('⚠️ ไม่พบ Remote "origin" ของ GitHub — กรุณาพิมพ์สั่งเชื่อมต่อ Remote ก่อน เพื่อผลักดันโค้ดขึ้น GitHub');
     console.warn('   (ตัวอย่าง: git remote add origin https://github.com/Chayapong/YOUR_REPO.git)');
   }
 } else {
