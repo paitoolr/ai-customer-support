@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Trading & EA Portfolio Dashboard - ระบบวางแผนการเทรดอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #051307 0%, #030a0f 50%, #0a0414 100%);
+            --glass-bg: rgba(10, 25, 15, 0.45);
+            --glass-border: rgba(0, 230, 118, 0.15);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            --neon-green: #00e676;
+            --neon-cyan: #00e5ff;
+            --neon-purple: #d500f9;
+            --text-primary: #ffffff;
+            --text-secondary: #b0bec5;
+            --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Ambient Glow Background elements */
+        .glow-orb {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(150px);
+            z-index: -1;
+            opacity: 0.25;
+            pointer-events: none;
+        }
+        .orb-1 {
+            top: 10%;
+            left: 5%;
+            background: var(--neon-green);
+        }
+        .orb-2 {
+            bottom: 10%;
+            right: 5%;
+            background: var(--neon-cyan);
+        }
+
+        header {
+            background: rgba(5, 15, 8, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: #051307;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+        }
+
+        .brand-title h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--text-primary), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #ffd700, #ff9100);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: none;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-green));
+            color: #000;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+        }
+
+        main {
+            flex: 1;
+            padding: 3rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            z-index: 10;
+        }
+
+        /* Glassmorphism Dashboard Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--panel-shadow);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 230, 118, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--glass-highlight);
+            padding-bottom: 12px;
+            color: var(--neon-cyan);
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-green);
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 15px 12px 40px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+        }
+
+        /* Range sliders custom styling */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider-val {
+            min-width: 60px;
+            text-align: right;
+            font-weight: bold;
+            color: var(--neon-green);
+        }
+
+        .range-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            background: rgba(0, 0, 0, 0.5);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--neon-green);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-green);
+            transition: transform 0.1s;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            color: #000;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 230, 118, 0.2);
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.4);
+        }
+
+        /* Result display style */
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 480px) {
+            .result-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-highlight);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--neon-green);
+        }
+
+        .stat-value.danger {
+            color: #ff1744;
+        }
+
+        /* Graph container */
+        .chart-container {
+            width: 100%;
+            height: 250px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #chartCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .ai-analysis {
+            background: rgba(0, 229, 255, 0.05);
+            border-left: 4px solid var(--neon-cyan);
+            border-radius: 0 12px 12px 0;
+            padding: 20px;
+            min-height: 120px;
+        }
+
+        .ai-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--neon-cyan);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .placeholder-text {
+            color: var(--text-secondary);
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Lead Gen Section */
+        .lead-section {
+            margin-top: 50px;
+            background: linear-gradient(135deg, rgba(0, 230, 118, 0.08), rgba(0, 229, 255, 0.08));
+            border-color: rgba(0, 230, 118, 0.25);
+        }
+
+        .lead-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .lead-header h2 {
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            margin-bottom: 8px;
+        }
+
+        .lead-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .lead-form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr) auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        @media (max-width: 900px) {
+            .lead-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lead-form-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        .lead-form-grid .btn-submit {
+            margin-top: 0;
+            height: 47px;
+        }
+
+        /* Paywall Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: rgba(10, 15, 25, 0.9);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+            border-radius: 24px;
+            max-width: 550px;
+            width: 100%;
+            padding: 35px;
+            position: relative;
+            transform: scale(0.9);
+            animation: modalFadeIn 0.3s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+        }
+
+        @keyframes modalFadeIn {
+            to { transform: scale(1); }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: white;
+        }
+
+        .modal-header {
+            margin-bottom: 25px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.8rem;
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .modal-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .pro-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-highlight);
+        }
+
+        .pro-features li {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pro-features li::before {
+            content: '✦';
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .paywall-qr-container {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qr-placeholder {
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .qr-placeholder::after {
+            content: 'PRO PAY';
+            position: absolute;
+            background: #00e676;
+            color: #000;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Simple PromptPay QR representation with CSS */
+        .qr-graphic {
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, #000 25%, transparent 25%), 
+                linear-gradient(-45deg, #000 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #000 75%), 
+                linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border: 5px solid #03304a; /* promptpay style blue */
+        }
+
+        .payment-info {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #ffd700;
+        }
+
+        .payment-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .slip-upload-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .btn-file {
+            border: 1px dashed var(--neon-cyan);
+            background: rgba(0, 229, 255, 0.05);
+            color: var(--neon-cyan);
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-file:hover {
+            background: rgba(0, 229, 255, 0.15);
+            border-color: white;
+        }
+
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-name-display {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--neon-green);
+            text-align: center;
+            display: none;
+        }
+
+        .btn-pro-confirm {
+            background: linear-gradient(135deg, #ffd700, #ff9100);
+            color: #000;
+            font-weight: 800;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .btn-pro-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Success Alert */
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(5, 19, 7, 0.9);
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+            border-radius: 10px;
+            padding: 15px 25px;
+            color: white;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        footer {
+            border-top: 1px solid var(--glass-border);
+            padding: 2rem 5%;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            margin-top: auto;
+        }
+
+        footer p {
+            margin-bottom: 8px;
+        }
+
+        /* Canvas drawing effects */
+        .grid-line {
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 1;
+        }
+
+        /* Confetti particle canvas for purchase celebration */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+
+    <canvas id="confettiCanvas"></canvas>
+
+    <header>
+        <div class="brand-container">
+            <div class="brand-logo">KS</div>
+            <div class="brand-title">
+                <h1>Kongsuk Portfolio Dashboard</h1>
+                <p>ระบบวางแผนและบริหารพอร์ตอัจฉริยะกองสุข</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span class="pro-badge" id="proBadge">PRO VERSION</span>
+            <button class="btn-upgrade" id="btnHeaderUpgrade" onclick="openPaywall()">อัปเกรด Pro 999 ฿</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="dashboard-grid">
+            <!-- Left Panel: Configurations -->
+            <div class="card">
+                <div class="card-title">
+                    <span>⚡</span> ตั้งค่าพารามิเตอร์ระบบเทรด
+                </div>
+                <form id="portfolioForm" onsubmit="calculatePortfolio(event)">
+                    <div class="form-group">
+                        <label for="initialBalance">เงินทุนเริ่มต้น (Initial Balance)</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">$</span>
+                            <input type="number" id="initialBalance" class="form-control" value="10000" min="100" max="1000000" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ความเสี่ยงต่อไม้ (Risk per Trade %)</label>
+                        <div class="slider-container">
+                            <input type="range" id="riskPerTrade" class="range-slider" min="0.5" max="10" step="0.5" value="2" oninput="updateSliderVal('riskPerTradeVal', this.value + '%')">
+                            <span class="slider-val" id="riskPerTradeVal">2%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="strategySelect">กลยุทธ์หลักของบอต (Primary Strategy)</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">⚙️</span>
+                            <select id="strategySelect" class="form-control" style="padding-left: 40px;">
+                                <option value="breakout">Kongsuk Breakout Channel (กลยุทธ์ตามแนวโน้มเมื่อทะลุแนวต้าน)</option>
+                                <option value="trend">Kongsuk Trend Hunter (กลยุทธ์ตามเทรนด์ EMA Crossover)</option>
+                                <option value="reversion">Kongsuk Mean Reversion (กลยุทธ์ดึงกลับสู่ค่าเฉลี่ย RSI/Bollinger)</option>
+                                <option value="multistrat">Kongsuk Multi-Strategy Unified (กลยุทธ์ผสมวิเคราะห์ดวงดาว)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eaCount">จำนวน EA ที่เปิดรันพร้อมกัน (EA Instances)</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🤖</span>
+                            <input type="number" id="eaCount" class="form-control" value="3" min="1" max="50" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>อัตราการชนะคาดหวัง (Expected Win Rate)</label>
+                        <div class="slider-container">
+                            <input type="range" id="winRate" class="range-slider" min="30" max="90" step="1" value="55" oninput="updateSliderVal('winRateVal', this.value + '%')">
+                            <span class="slider-val" id="winRateVal">55%</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <span>📊</span> เริ่มคำนวณและประมวลผลด้วย AI
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Panel: Output & Visuals -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-title">
+                    <span>📈</span> ผลวิเคราะห์การประมวลผลและการจำลองพอร์ต
+                </div>
+
+                <div class="result-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">ยอดบาลานซ์จำลอง (30 วัน)</div>
+                        <div class="stat-value" id="finalBalanceText">$10,000.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">ประมาณการกำไรสุทธิ</div>
+                        <div class="stat-value" id="netProfitText">$0.00 (0.0%)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">ความเสี่ยงดรอว์ดาวน์สูงสุด</div>
+                        <div class="stat-value danger" id="maxDDText">0.0%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="chartCanvas"></canvas>
+                    <div id="chartPlaceholder" class="placeholder-text" style="position: absolute;">
+                        กรุณากดปุ่ม "เริ่มคำนวณและประมวลผลด้วย AI" เพื่อดูวิถีกราฟพอร์ต
+                    </div>
+                </div>
+
+                <div class="ai-analysis">
+                    <div class="ai-title">
+                        <span>🤖</span> บทวิเคราะห์แผนการลงทุนจาก AI กองสุข
+                    </div>
+                    <div class="ai-text" id="aiAnalysisText">
+                        กรุณากรอกข้อมูลและกดปุ่มคำนวณด้านซ้าย เพื่อวิเคราะห์แผนบริหารการเงินและความเสี่ยง...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lead Generation Box -->
+        <div class="card lead-section">
+            <div class="lead-header">
+                <h2>ลงทะเบียนรับแผน PDF และ EA ทดลองใช้งานฟรี 6 เดือน</h2>
+                <p>ป้อนอีเมล Gmail เพื่อเปิดใช้งานสิทธิ์ลิขสิทธิ์ฟรีทันที ส่งตรงเข้าห้องวิเคราะห์ของสมองกองสุข</p>
+            </div>
+            <form id="leadForm" onsubmit="submitLead(event)">
+                <div class="lead-form-grid">
+                    <div class="form-group">
+                        <label for="leadName">ชื่อผู้ใช้งาน</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">👤</span>
+                            <input type="text" id="leadName" class="form-control" placeholder="ชื่อของคุณ" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="leadEmail">อีเมล (บังคับ @gmail.com)</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">✉️</span>
+                            <input type="email" id="leadEmail" class="form-control" placeholder="example@gmail.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="leadPhone">เบอร์โทรศัพท์</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📞</span>
+                            <input type="tel" id="leadPhone" class="form-control" placeholder="08XXXXXXXX" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        <span>✨</span> รับแผนและสิทธิ์ใช้งานฟรี
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Paywall Modal -->
+    <div class="modal" id="paywallModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePaywall()">&times;</span>
+            <div class="modal-header">
+                <h3>👑 ปลดล็อกขีดจำกัดด้วย PRO LIFETIME</h3>
+                <p>ยกระดับประสิทธิภาพความแม่นยำและการซิงค์แบบเรียลไทม์ 100%</p>
+            </div>
+            
+            <ul class="pro-features">
+                <li>สิทธิ์เข้าใช้งานระบบทดสอบแบบ Multi-currency พร้อมกันไม่จำกัด</li>
+                <li>ระบบวิเคราะห์ปัจจัยทางเทคนิคผ่านโมเดล Gemini 2.5 Flash ระดับลึก</li>
+                <li>ซิงก์ข้อมูลออเดอร์สดและการแจ้งเตือนผลกำไรผ่าน Telegram บอทส่วนตัว</li>
+                <li>ระบบรับส่งสัญญาณความปลอดภัยสูง (Relay Server) พร้อมการคุ้มครองพอร์ต</li>
+            </ul>
+
+            <div class="paywall-qr-container">
+                <div class="qr-placeholder">
+                    <div class="qr-graphic"></div>
+                </div>
+                <div class="payment-info">แสกนจ่ายเงิน 999.00 บาท</div>
+                <div class="payment-sub">พร้อมเพย์ กองสุข เทรดดิ้ง เอนเตอร์ไพรส์ (จำลอง)</div>
+            </div>
+
+            <div class="slip-upload-group">
+                <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; text-align: center;">
+                    แนบรูปภาพสลิปการโอนเงิน (จำลอง) เพื่อปลดล็อก PRO ทันที
+                </label>
+                <div class="file-input-wrapper">
+                    <label class="btn-file">
+                        📁 เลือกไฟล์สลิปหรือรูปภาพ...
+                        <input type="file" id="slipFile" accept="image/*" onchange="displayFileName(this)">
+                    </label>
+                </div>
+                <div class="file-name-display" id="fileNameDisplay">ไม่มีไฟล์ที่เลือก</div>
+            </div>
+
+            <button class="btn-pro-confirm" onclick="activatePro()">✓ ส่งสลิปและอัปเกรดเวอร์ชัน PRO</button>
+        </div>
+    </div>
+
+    <!-- Success Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toastIcon">🟢</span>
+        <span id="toastMessage">บันทึกข้อมูลเรียบร้อยแล้ว</span>
+    </div>
+
+    <footer>
+        <p>© 2026 ระบบกองสุข (Kongsuk Empire) - คอนเทนต์ ความปลอดภัย และเทคโนโลยีความมั่งคั่ง</p>
+        <p>ขับเคลื่อนด้วย Gemini 2.5 Flash + ระบบวิวัฒนาการและป้องกันตัวเองอัจฉริยะ (Windows Hide 100%)</p>
+    </footer>
+
+    <script>
+        let isPro = false;
+        let runCount = 0;
+
+        function updateSliderVal(id, val) {
+            document.getElementById(id).innerText = val;
+        }
+
+        function openPaywall() {
+            document.getElementById('paywallModal').style.display = 'flex';
+        }
+
+        function closePaywall() {
+            document.getElementById('paywallModal').style.display = 'none';
+        }
+
+        function displayFileName(input) {
+            const display = document.getElementById('fileNameDisplay');
+            if (input.files && input.files.length > 0) {
+                display.innerText = "ไฟล์ที่เลือก: " + input.files[0].name;
+                display.style.display = 'block';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        function showToast(message, icon = '🟢') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = message;
+            document.getElementById('toastIcon').innerText = icon;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Confetti script for celebration
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const ctx = confettiCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeConfetti() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeConfetti);
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * confettiCanvas.width;
+                this.y = Math.random() * confettiCanvas.height - confettiCanvas.height;
+                this.size = Math.random() * 8 + 4;
+                this.color = ['#00e676', '#00e5ff', '#d500f9', '#ffd700', '#ff1744'][Math.floor(Math.random() * 5)];
+                this.speedY = Math.random() * 3 + 2;
+                this.speedX = Math.random() * 2 - 1;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 4 - 2;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function startConfetti() {
+            confettiCanvas.style.display = 'block';
+            resizeConfetti();
+            particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push(new Particle());
+            }
+            animateConfetti();
+            setTimeout(() => {
+                confettiCanvas.style.display = 'none';
+            }, 5000);
+        }
+
+        function animateConfetti() {
+            if (confettiCanvas.style.display === 'none') return;
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            particles.forEach((p, idx) => {
+                p.update();
+                p.draw();
+                if (p.y > confettiCanvas.height) {
+                    particles[idx] = new Particle();
+                }
+            });
+            requestAnimationFrame(animateConfetti);
+        }
+
+        function activatePro() {
+            const slip = document.getElementById('slipFile');
+            if (!slip.files || slip.files.length === 0) {
+                alert("กรุณาแนบภาพสลิปการโอนเงิน (จำลอง) ของคุณ");
+                return;
+            }
+
+            isPro = true;
+            closePaywall();
+            startConfetti();
+            
+            // UI Upgrades to PRO
+            document.getElementById('proBadge').style.display = 'inline-block';
+            document.getElementById('btnHeaderUpgrade').style.display = 'none';
+            showToast("ยินดีด้วย! บัญชีของคุณได้รับการอัปเกรดเป็น PRO เรียบร้อย", "👑");
+
+            // Re-calculate if we already calculated to show the pro difference
+            const initialBalance = document.getElementById('initialBalance').value;
+            if (runCount > 0) {
+                simulateData(parseFloat(initialBalance), true);
+            }
+        }
+
+        function submitLead(event) {
+            event.preventDefault();
+            const name = document.getElementById('leadName').value;
+            const email = document.getElementById('leadEmail').value;
+            const phone = document.getElementById('leadPhone').value;
+
+            if (!email.endsWith('@gmail.com')) {
+                alert("กรุณาใช้อีเมลสมัครที่เป็น @gmail.com เท่านั้น เพื่อตรวจสอบสิทธิ์ลิขสิทธิ์บอต");
+                return;
+            }
+
+            // Simulated Lead submission
+            showToast("ส่งคำขอลงทะเบียนสำเร็จ! คีย์ลิขสิทธิ์ฟรีส่งไปทางเมลของคุณแล้ว", "✉️");
+            document.getElementById('leadForm').reset();
+        }
+
+        function calculatePortfolio(event) {
+            event.preventDefault();
+            
+            runCount++;
+
+            // If not pro and run twice, trigger paywall
+            if (!isPro && runCount > 2) {
+                openPaywall();
+                showToast("จำกัดสิทธิ์เวอร์ชันฟรี! กรุณาอัปเกรด Pro เพื่อใช้งานต่อ", "⚠️");
+                return;
+            }
+
+            const initialBalance = parseFloat(document.getElementById('initialBalance').value);
+            simulateData(initialBalance, isPro);
+        }
+
+        function simulateData(balance, premiumMode) {
+            document.getElementById('chartPlaceholder').style.display = 'none';
+            
+            const risk = parseFloat(document.getElementById('riskPerTrade').value);
+            const strat = document.getElementById('strategySelect').value;
+            const eaCount = parseInt(document.getElementById('eaCount').value);
+            const winRate = parseFloat(document.getElementById('winRate').value);
+
+            // Generate random trade simulation data
+            let current = balance;
+            const days = 30;
+            const balanceHistory = [balance];
+            
+            // Seeded calculation parameters depending on inputs
+            let baseWinRate = winRate / 100;
+            let profitFactor = 1.5; // reward to risk ratio
+
+            if (strat === 'breakout') {
+                profitFactor = 2.0; // High RR
+            } else if (strat === 'reversion') {
+                profitFactor = 1.2; // Low RR
+            } else if (strat === 'multistrat') {
+                baseWinRate += 0.05; // Astronomical advantage
+                profitFactor = 1.8;
+            }
+
+            // Multi-EA efficiency factor
+            const efficiency = 1 + (eaCount * 0.02); 
+
+            let maxDD = 0;
+            let peak = balance;
+
+            for (let i = 1; i <= days; i++) {
+                // Number of trades in a day based on active EAs
+                const tradesCount = Math.floor(Math.random() * eaCount) + 1;
+                for (let t = 0; t < tradesCount; t++) {
+                    const isWin = Math.random() < baseWinRate;
+                    const riskAmt = current * (risk / 100);
+                    if (isWin) {
+                        current += riskAmt * profitFactor * efficiency;
+                    } else {
+                        current -= riskAmt;
+                    }
+
+                    if (current > peak) {
+                        peak = current;
+                    }
+                    const dd = ((peak - current) / peak) * 100;
+                    if (dd > maxDD) {
+                        maxDD = dd;
+                    }
+                }
+                balanceHistory.push(current);
+            }
+
+            const netProfit = current - balance;
+            const netProfitPct = (netProfit / balance) * 100;
+
+            // Update UI text values
+            document.getElementById('finalBalanceText').innerText = "$" + current.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            const profitText = document.getElementById('netProfitText');
+            profitText.innerText = (netProfit >= 0 ? "+" : "") + "$" + netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " (" + netProfitPct.toFixed(1) + "%)";
+            if (netProfit >= 0) {
+                profitText.style.color = 'var(--neon-green)';
+            } else {
+                profitText.style.color = '#ff1744';
+            }
+
+            document.getElementById('maxDDText').innerText = maxDD.toFixed(1) + "%";
+
+            // Draw line chart on Canvas
+            drawChart(balanceHistory);
+
+            // Generate AI Analysis Text
+            generateAIAnalysis(strat, risk, winRate, eaCount, maxDD, netProfitPct, premiumMode);
+        }
+
+        function drawChart(history) {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Handle high DPI displays
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = rect.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Grid Lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            const gridCount = 5;
+            for (let i = 0; i <= gridCount; i++) {
+                // Horizontal grid
+                const y = (height - 30) * (i / gridCount) + 15;
+                ctx.beginPath();
+                ctx.moveTo(35, y);
+                ctx.lineTo(width - 15, y);
+                ctx.stroke();
+
+                // Vertical grid
+                const x = (width - 50) * (i / gridCount) + 35;
+                ctx.beginPath();
+                ctx.moveTo(x, 15);
+                ctx.lineTo(x, height - 20);
+                ctx.stroke();
+            }
+
+            // Find min/max for scaling
+            const maxVal = Math.max(...history);
+            const minVal = Math.min(...history);
+            const valRange = maxVal - minVal || 1;
+
+            const paddingLeft = 45;
+            const paddingRight = 15;
+            const paddingTop = 20;
+            const paddingBottom = 25;
+
+            const graphWidth = width - paddingLeft - paddingRight;
+            const graphHeight = height - paddingTop - paddingBottom;
+
+            // Draw Y Axis Labels
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.font = '9px Outfit';
+            ctx.textAlign = 'right';
+            ctx.fillText("$" + Math.round(maxVal).toLocaleString(), paddingLeft - 5, paddingTop + 3);
+            ctx.fillText("$" + Math.round(minVal + valRange/2).toLocaleString(), paddingLeft - 5, paddingTop + graphHeight/2 + 3);
+            ctx.fillText("$" + Math.round(minVal).toLocaleString(), paddingLeft - 5, paddingTop + graphHeight + 3);
+
+            // Draw Graph Line
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            
+            // Set dynamic gradient for line
+            const lineGrad = ctx.createLinearGradient(0, 0, width, 0);
+            lineGrad.addColorStop(0, 'var(--neon-green)');
+            lineGrad.addColorStop(1, 'var(--neon-cyan)');
+            ctx.strokeStyle = lineGrad;
+
+            history.forEach((val, idx) => {
+                const x = paddingLeft + (idx / (history.length - 1)) * graphWidth;
+                const y = paddingTop + graphHeight - ((val - minVal) / valRange) * graphHeight;
+                if (idx === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+
+            // Fill under the line (Area chart)
+            ctx.lineTo(paddingLeft + graphWidth, paddingTop + graphHeight);
+            ctx.lineTo(paddingLeft, paddingTop + graphHeight);
+            ctx.closePath();
+            const areaGrad = ctx.createLinearGradient(0, paddingTop, 0, paddingTop + graphHeight);
+            areaGrad.addColorStop(0, 'rgba(0, 229, 255, 0.15)');
+            areaGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+            ctx.fillStyle = areaGrad;
+            ctx.fill();
+
+            // Draw Dots on start and end
+            ctx.fillStyle = 'var(--neon-green)';
+            ctx.beginPath();
+            ctx.arc(paddingLeft, paddingTop + graphHeight - ((history[0] - minVal) / valRange) * graphHeight, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'var(--neon-cyan)';
+            ctx.beginPath();
+            ctx.arc(paddingLeft + graphWidth, paddingTop + graphHeight - ((history[history.length - 1] - minVal) / valRange) * graphHeight, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function generateAIAnalysis(strat, risk, winRate, eaCount, maxDD, profitPct, premiumMode) {
+            const aiText = document.getElementById('aiAnalysisText');
+            aiText.innerHTML = ""; // Clear for typing effect
+            
+            let message = "";
+            
+            if (premiumMode) {
+                message += "👑 [โหมดวิเคราะห์ PRO พิเศษ] ";
+            }
+
+            if (maxDD > 25) {
+                message += "⚠️ การวิเคราะห์พบว่าความเสี่ยงอยู่ในระดับ 'สูงมาก' (Max Drawdown " + maxDD.toFixed(1) + "%). การเปิดความเสี่ยงต่อไม้ที่ " + risk + "% พร้อมบอตจำนวน " + eaCount + " ตัว ถือเป็นสภาวะ Overleveraging แนะนำให้ปรับลดความเสี่ยงลงมาเหลือ 1% - 1.5% ต่อไม้เพื่อความปลอดภัยในระยะยาวของพอร์ต ";
+            } else {
+                message += "🟢 พอร์ตจำลองมีสภาวะความเสี่ยงที่สมดุลดีเยี่ยม (Max Drawdown อยู่ที่ " + maxDD.toFixed(1) + "%). การเลือกใช้กลยุทธ์ " + strat.toUpperCase() + " สามารถสร้างความมั่งคั่งสะสมได้อย่างมีนัยสำคัญ ";
+            }
+
+            if (profitPct > 0) {
+                message += "ด้วยอัตรา Win Rate " + winRate + "%, คาดการณ์กำไรสะสมของคุณสามารถเติบโตเป็นบวกได้เฉลี่ยที่ " + profitPct.toFixed(1) + "% ต่อเดือน. ";
+            } else {
+                message += "ด้วยค่าสถิติปัจจุบัน พอร์ตของคุณมีความเสี่ยงที่จะขาดทุนสะสมสุทธิในรอบ 30 วัน. แนะนำให้พัฒนาบอต EA ตัวถัดไปที่มี Reward-to-Risk Ratio ดีขึ้น หรือสลับไปใช้กลยุทธ์ Multi-Strategy ";
+            }
+
+            if (!premiumMode) {
+                message += "\n\n💡 สนใจอัปเกรดระบบเพื่อปลดล็อกฟังก์ชัน Multi-currency และรับการแจ้งเตือนสดผ่านสัญญาณ Telegram หรือไม่? กดอัปเกรด Pro ด้านบนได้เลย!";
+            } else {
+                message += "\n\n📈 บัญชี PRO ของคุณได้รับสิทธิ์ซิงค์ข้อมูลกับไฟล์ trading_history.csv โดยตรงเรียบร้อย บอตทำงานอย่างเป็นความลื่นไหล!";
+            }
+
+            // Typing effect
+            let idx = 0;
+            function typeChar() {
+                if (idx < message.length) {
+                    // check if new line
+                    if (message.substring(idx, idx + 1) === "\n") {
+                        aiText.innerHTML += "<br>";
+                    } else {
+                        aiText.innerHTML += message.substring(idx, idx + 1);
+                    }
+                    idx++;
+                    setTimeout(typeChar, 10);
+                }
+            }
+            typeChar();
+        }
+    </script>
+</body>
+</html>

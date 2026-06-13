@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk AI-VTuber Stream Controller - ระบบควบคุมอวตารอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-purple: #d500f9;
+            --neon-purple-glow: rgba(213, 0, 249, 0.4);
+            --cyber-cyan: #00e5ff;
+            --cyber-cyan-glow: rgba(0, 229, 255, 0.4);
+            --dark-bg: #09030f; /* ม่วงเข้มมืดไซเบอร์ */
+            --card-bg: rgba(23, 11, 36, 0.55);
+            --glass-border: rgba(213, 0, 249, 0.2);
+            --text-primary: #f3e5f5;
+            --text-secondary: #b0bec5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 0%, #210a35 0%, var(--dark-bg) 80%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Ambient Glowing Orbs */
+        .glow-orb-1 {
+            position: fixed;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, var(--neon-purple-glow) 0%, transparent 70%);
+            top: -150px;
+            left: -100px;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(50px);
+            animation: orbFloat1 18s ease-in-out infinite alternate;
+        }
+
+        .glow-orb-2 {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--cyber-cyan-glow) 0%, transparent 70%);
+            bottom: -150px;
+            right: -100px;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(60px);
+            animation: orbFloat2 22s ease-in-out infinite alternate;
+        }
+
+        @keyframes orbFloat1 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 80px) scale(1.1); }
+        }
+
+        @keyframes orbFloat2 {
+            0% { transform: translate(0, 0) scale(1.2); }
+            100% { transform: translate(-80px, -60px) scale(0.9); }
+        }
+
+        /* Premium Glassmorphism Card styling */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 229, 255, 0.4);
+            box-shadow: 0 20px 48px rgba(0, 229, 255, 0.15);
+        }
+
+        /* Header Layout */
+        header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--neon-purple), var(--cyber-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            animation: textPulse 3s infinite alternate;
+        }
+
+        @keyframes textPulse {
+            0% { filter: drop-shadow(0 0 2px var(--neon-purple-glow)); }
+            100% { filter: drop-shadow(0 0 10px var(--cyber-cyan)); }
+        }
+
+        .brand-title-group h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-title-group p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, var(--cyber-cyan), #00b0ff);
+            color: #000;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            margin-left: 6px;
+            box-shadow: 0 0 8px var(--cyber-cyan-glow);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(135deg, var(--neon-purple), #aa00ff);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--neon-purple-glow);
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--neon-purple);
+        }
+
+        /* Grid System */
+        main {
+            max-width: 1200px;
+            margin: 10px auto;
+            padding: 0 24px 80px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Config Card */
+        .config-card h2 {
+            font-size: 1.3rem;
+            color: var(--cyber-cyan);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .select-input, .text-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .select-input:focus, .text-input:focus {
+            border-color: var(--cyber-cyan);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .select-input option {
+            background: #150924;
+            color: var(--text-primary);
+        }
+
+        /* Launcher Button */
+        .btn-launch {
+            width: 100%;
+            background: linear-gradient(135deg, var(--cyber-cyan), #00b0ff);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--cyber-cyan-glow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--cyber-cyan);
+        }
+
+        /* Live Chat Feed box */
+        .chat-feed-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 14px;
+            height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chat-msg {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--neon-purple);
+            padding: 8px 12px;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-msg:hover {
+            background: rgba(213, 0, 249, 0.08);
+        }
+
+        .chat-user {
+            color: var(--cyber-cyan);
+            font-weight: 700;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Monitor Display Card */
+        .monitor-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .monitor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #78909c;
+        }
+
+        .status-dot.active {
+            background: #00e5ff;
+            box-shadow: 0 0 10px #00e5ff;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .status-dot.speaking {
+            background: var(--neon-purple);
+            box-shadow: 0 0 10px var(--neon-purple);
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* VTuber Virtual Screen */
+        .vtuber-screen {
+            background: radial-gradient(circle, #25123e 0%, #0c0516 100%);
+            border: 2px solid rgba(213, 0, 249, 0.3);
+            border-radius: 16px;
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* CSS VTuber Avatar drawing & animations */
+        .avatar-container {
+            position: relative;
+            width: 140px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: avatarIdle 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes avatarIdle {
+            0% { transform: translateY(0) rotate(0); }
+            100% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        .avatar-hair-back {
+            position: absolute;
+            width: 110px;
+            height: 120px;
+            background: #6a1b9a;
+            border-radius: 40px;
+            top: 10px;
+            z-index: 1;
+        }
+
+        .avatar-face {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: #ffeb3b; /* จำลองสีครีม */
+            background: #ffe0b2;
+            border-radius: 50%;
+            top: 25px;
+            z-index: 5;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .avatar-eye {
+            position: absolute;
+            width: 10px;
+            height: 14px;
+            background: #212121;
+            border-radius: 50%;
+            top: 45px;
+            z-index: 10;
+            animation: blink 4s infinite;
+        }
+
+        .avatar-eye.left { left: 45px; }
+        .avatar-eye.right { right: 45px; }
+
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        .avatar-mouth {
+            position: absolute;
+            width: 14px;
+            height: 8px;
+            border: 2px solid #e91e63;
+            border-radius: 0 0 10px 10px;
+            background: #fff;
+            top: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 0.15s;
+        }
+
+        .avatar-mouth.talking {
+            animation: mouthTalk 0.2s infinite alternate;
+            border-radius: 50%;
+            height: 14px;
+            width: 14px;
+        }
+
+        @keyframes mouthTalk {
+            0% { height: 6px; }
+            100% { height: 16px; }
+        }
+
+        .avatar-hair-front {
+            position: absolute;
+            width: 90px;
+            height: 40px;
+            background: #4a148c;
+            border-radius: 20px 20px 0 0;
+            top: 20px;
+            z-index: 6;
+        }
+
+        .avatar-body {
+            position: absolute;
+            width: 70px;
+            height: 80px;
+            background: #00e5ff;
+            border-radius: 24px 24px 0 0;
+            top: 100px;
+            z-index: 3;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Sound waves overlay on vtuber screen */
+        .sound-wave-overlay {
+            position: absolute;
+            bottom: 15px;
+            display: flex;
+            gap: 4px;
+            align-items: end;
+            height: 40px;
+            z-index: 15;
+            display: none;
+        }
+
+        .wave-bar {
+            width: 4px;
+            height: 5px;
+            background: var(--cyber-cyan);
+            animation: waveBounce 0.4s infinite alternate;
+        }
+
+        @keyframes waveBounce {
+            0% { height: 5px; }
+            100% { height: 35px; }
+        }
+
+        /* Console Log / AI response Box */
+        .response-console {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 100px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #00e5ff;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 140px;
+        }
+
+        /* Telemetry Cards */
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .tele-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .tele-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .tele-val {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--neon-purple);
+        }
+
+        /* Lead Section */
+        .lead-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .lead-grid {
+            display: grid;
+            grid-template-columns: 2fr 2fr 2fr 1fr;
+            gap: 16px;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .lead-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-lead-submit {
+            background: linear-gradient(135deg, var(--neon-purple), #aa00ff);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-lead-submit:hover {
+            box-shadow: 0 4px 15px var(--neon-purple-glow);
+        }
+
+        /* Paywall Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #18092a 0%, #0a0314 100%);
+            border: 2px solid var(--neon-purple);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 480px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(213, 0, 249, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-close:hover {
+            color: var(--neon-purple);
+        }
+
+        .paywall-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 12px 0;
+        }
+
+        .paywall-price span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+            margin-right: 8px;
+        }
+
+        .paywall-features {
+            list-style: none;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .paywall-features li {
+            padding: 8px 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .paywall-features li::before {
+            content: "✓";
+            color: var(--cyber-cyan);
+            font-weight: bold;
+        }
+
+        .qr-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qr-box {
+            width: 140px;
+            height: 140px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Simulated QR code */
+        .qr-graphics {
+            width: 120px;
+            height: 120px;
+            background-image: 
+                linear-gradient(45deg, #000 25%, transparent 25%), 
+                linear-gradient(-45deg, #000 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #000 75%), 
+                linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+            position: relative;
+        }
+
+        .qr-graphics::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 35px; height: 35px;
+            border: 5px solid #000;
+            background: #fff;
+        }
+
+        .qr-graphics::after {
+            content: "";
+            position: absolute;
+            bottom: 0; right: 0; width: 30px; height: 30px;
+            border: 5px solid #000;
+            background: #fff;
+        }
+
+        .btn-upload-slip {
+            background: linear-gradient(135deg, var(--cyber-cyan), #00b0ff);
+            color: #000;
+            font-weight: 800;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-upload-slip:hover {
+            box-shadow: 0 0 15px var(--cyber-cyan);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(106, 27, 154, 0.95);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
+    <!-- Header Section -->
+    <header>
+        <div class="brand-container">
+            <div class="brand-logo">🎭</div>
+            <div class="brand-title-group">
+                <h1>Kongsuk AI-VTuber Live</h1>
+                <p>แผงควบคุมสตรีมมิ่งอวตารอัจฉริยะ <span id="app-mode-badge" class="pro-badge" style="display:none;">PRO</span></p>
+            </div>
+        </div>
+        <div>
+            <button id="upgrade-pro-btn" class="btn-upgrade" onclick="openPaywall()">อัปเกรด PRO 999.-</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+        <!-- Config Section -->
+        <section class="glass-card config-card">
+            <h2>⚙️ ตัวกรองคาแรกเตอร์อวตาร (VTuber Config)</h2>
+            
+            <div class="form-group">
+                <label for="char-select">บุคลิกภาพบอต AI (Personality)</label>
+                <select id="char-select" class="select-input">
+                    <option value="guru">กูรูเทคโนโลยีและการลงทุน (สุขุมภูมิฐาน)</option>
+                    <option value="funny">ดีเจกวนๆ ตลกเฮฮา (เรียกเสียงฮาแชทสด)</option>
+                    <option value="cute">สาวน้อยน่ารักอ่อนหวาน (เป็นมิตรตอบรับไว)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="speech-select">สำเนียงการตอบพ่นเสียง (Speech Style)</label>
+                <select id="speech-select" class="select-input">
+                    <option value="th-standard">ภาษาไทยสำเนียงมาตรฐาน (เรียบร้อยชัดเจน)</option>
+                    <option value="th-mix">ภาษาไทยผสมอังกฤษ (สไตล์อินเตอร์ล้ำยุค)</option>
+                    <option value="th-local">ภาษาไทยถิ่นผสม (สร้างความสนิทสนมเป็นกันเอง)</option>
+                </select>
+            </div>
+
+            <!-- Simulated Chat List Feed -->
+            <div class="form-group">
+                <label>แชทสดจากผู้ชมเป้าหมาย (Live Stream Chat Feed)</label>
+                <p style="font-size:0.75rem; color: var(--text-secondary); margin-bottom: 6px;">
+                    คลิกเลือกคำถามของผู้ชมจากกล่องแชทด้านล่างนี้เพื่อส่งให้ AI ประมวลและพ่นเสียง:
+                </p>
+                <div class="chat-feed-box" id="chat-feed">
+                    <div class="chat-msg" onclick="selectQuestion('น้องส้มป่อย', 'ระบบไลฟ์ AIVTuber คุยสดนี่ตั้งค่าใช้งานยากไหมครับ?')">
+                        <div class="chat-user"><span>💬 น้องส้มป่อย</span><span style="font-size:0.7rem; color:rgba(255,255,255,0.3)">10s ago</span></div>
+                        <p>ระบบไลฟ์ AI VTuber คุยสดนี่ตั้งค่าใช้งานยากไหมครับ?</p>
+                    </div>
+                    <div class="chat-msg" onclick="selectQuestion('พี่เสก โซโล่', 'จ่ายค่า API เดือนละประมาณกี่บาทครับถ้าเปิดรัน 24 ชั่วโมง?')">
+                        <div class="chat-user"><span>💬 พี่เสก โซโล่</span><span style="font-size:0.7rem; color:rgba(255,255,255,0.3)">1m ago</span></div>
+                        <p>จ่ายค่า API เดือนละประมาณกี่บาทครับถ้าเปิดรัน 24 ชั่วโมง?</p>
+                    </div>
+                    <div class="chat-msg" onclick="selectQuestion('น้องบีบี', 'โมเดลอวตารปากขยับอ้าพูดตามเสียง TTS ได้อย่างไรคะ?')">
+                        <div class="chat-user"><span>💬 น้องบีบี</span><span style="font-size:0.7rem; color:rgba(255,255,255,0.3)">2m ago</span></div>
+                        <p>โมเดลอวตารปากขยับอ้าพูดตามเสียง TTS ได้อย่างไรคะ?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="selected-question">คำถามที่เลือกพร้อมส่งให้ AI</label>
+                <input type="text" id="selected-question" class="text-input" value="ระบบไลฟ์ AI VTuber คุยสดนี่ตั้งค่าใช้งานยากไหมครับ?" placeholder="เลือกคำถามจากแชทสดหรือพิมพ์ที่นี่...">
+            </div>
+
+            <button id="btn-respond" class="btn-launch" onclick="respondWithVTuber()">
+                🔊 ประมวลคำตอบและพ่นเสียง (Respond)
+            </button>
+        </section>
+
+        <!-- Monitor Section -->
+        <section class="glass-card monitor-card">
+            <div class="monitor-header">
+                <h3>📺 หน้าจอมอนิเตอร์อวตาร (OBS Output Viewer)</h3>
+                <div class="status-badge">
+                    <span id="monitor-status-dot" class="status-dot"></span>
+                    <span id="monitor-status-text">พร้อมใช้งาน</span>
+                </div>
+            </div>
+
+            <!-- Virtual VTuber Screen -->
+            <div class="vtuber-screen" id="live-screen">
+                <!-- VTuber CSS Avatar -->
+                <div class="avatar-container">
+                    <div class="avatar-hair-back"></div>
+                    <div class="avatar-face">
+                        <div class="avatar-eye left" id="eye-l"></div>
+                        <div class="avatar-eye right" id="eye-r"></div>
+                        <div class="avatar-mouth" id="mouth"></div>
+                    </div>
+                    <div class="avatar-hair-front"></div>
+                    <div class="avatar-body"></div>
+                </div>
+
+                <!-- Sound wave bars -->
+                <div class="sound-wave-overlay" id="wave-overlay">
+                    <div class="wave-bar" style="animation-delay: 0.1s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.3s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.5s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.2s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.4s;"></div>
+                </div>
+            </div>
+
+            <!-- Telemetry Row -->
+            <div class="telemetry-grid">
+                <div class="tele-card">
+                    <div class="tele-label">ความหน่วงประมวลผล (Latency)</div>
+                    <div id="tele-latency" class="tele-val">0 ms</div>
+                </div>
+                <div class="tele-card">
+                    <div class="tele-label">โทเค็นใช้งานสะสม</div>
+                    <div id="tele-token" class="tele-val">0 tkn</div>
+                </div>
+                <div class="tele-card">
+                    <div class="tele-label">ผู้ชมสด Concurrent</div>
+                    <div id="tele-viewers" class="tele-val">124 คน</div>
+                </div>
+            </div>
+
+            <!-- Console output -->
+            <div class="response-console" id="console-output">> หน้าจอพร้อมจำลองรับสัญญาณ... เลือกแชทสดผู้ชมแล้วคลิกปุ่ม Respond</div>
+        </section>
+
+        <!-- Lead Section -->
+        <section class="glass-card lead-section">
+            <h3 style="color: var(--cyber-cyan); margin-bottom: 6px;">📩 รับสคริปต์ Node.js สำหรับต่อท่อแชตสดและพิมพ์เขียว OBS ฟรี!</h3>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom: 16px;">
+                ลงทะเบียนยืนยันตัวตนด้วยบัญชี Gmail เพื่อรับไฟล์สคริปต์และคู่มือการเชื่อมต่อ Virtual Audio Cable กับ VTube Studio ฟรี 6 เดือน
+            </p>
+            <form id="lead-form" onsubmit="submitLead(event)">
+                <div class="lead-grid">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="lead-name">ชื่อผู้พัฒนา</label>
+                        <input type="text" id="lead-name" class="text-input" placeholder="สมจิตต์ กู้เกียรติ" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="lead-email">อีเมล (@gmail.com เท่านั้น)</label>
+                        <input type="email" id="lead-email" class="text-input" placeholder="somjit@gmail.com" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="lead-phone">เบอร์โทรศัพท์</label>
+                        <input type="tel" id="lead-phone" class="text-input" placeholder="0898765432" required>
+                    </div>
+                    <button type="submit" class="btn-lead-submit">ขอรับพิมพ์เขียวฟรี</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <!-- Paywall Modal -->
+    <div class="modal-overlay" id="paywall-modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closePaywall()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size:3rem; margin-bottom:10px;">👑</div>
+                <h3 style="color:var(--neon-purple); font-size:1.5rem; font-weight:800;">Kongsuk AI-VTuber PRO</h3>
+                <p style="color:var(--text-secondary); font-size:0.85rem;">เชื่อมต่อเสียงพูดสมจริงขั้นพรีเมียมและโมเดล Live2D แบบไร้ขีดจำกัด</p>
+                <div class="paywall-price"><span>฿1,999</span> ฿999 <span style="text-decoration:none; color:var(--neon-purple); font-size:1rem;">/ Lifetime</span></div>
+            </div>
+
+            <ul class="paywall-features">
+                <li>ปลดล็อกเสียงพากย์ธรรมชาติ ElevenLabs ระดับพรีเมียม</li>
+                <li>สิทธิ์ในการเชื่อมโยงต่อแชตสด API จริงเข้าหลังบ้าน n8n</li>
+                <li>ดาวน์โหลดโมเดล VTuber ลิขสิทธิ์พิเศษ 10 โมเดลสำเร็จรูป</li>
+                <li>ผู้ช่วยระบบหลังบ้านคอยซัพพอร์ตตั้งค่าระบบ 24 ชั่วโมง</li>
+            </ul>
+
+            <div class="qr-section">
+                <p style="font-weight: 600; font-size: 0.9rem;">สแกนโอนชำระเพื่อขอสิทธิ์ PRO (จำลองระบบ)</p>
+                <div class="qr-box">
+                    <div class="qr-graphics"></div>
+                </div>
+                <p style="font-size:0.8rem; color:var(--neon-purple);">ธนาคารกสิกรไทย บจก.กองสุขเอ็มไพร์</p>
+            </div>
+
+            <div style="text-align: center;">
+                <label for="slip-file" class="btn-upload-slip" style="display:inline-block;">
+                    📸 อัปโหลดรูปภาพสลิป
+                </label>
+                <input type="file" id="slip-file" style="display:none;" onchange="simulateSlipUpload()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">ดำเนินการสำเร็จเรียบร้อย!</div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 Kongsuk Empire. All rights reserved. พัฒนาขึ้นโดยศูนย์วิจัยเทคโนโลยีสตรีมมิ่งอัจฉริยะ กองสุข 5</p>
+    </footer>
+
+    <script>
+        let isPro = false;
+        let respondCount = 0;
+        let talkInterval;
+        let tokenAccumulated = 0;
+
+        function selectQuestion(user, text) {
+            document.getElementById('selected-question').value = text;
+            writeConsole(`เลือกแชทผู้ชม: [${user}] "${text}"`);
+        }
+
+        function writeConsole(text) {
+            const consoleBox = document.getElementById('console-output');
+            consoleBox.innerHTML += '\n> ' + text;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function openPaywall() {
+            document.getElementById('paywall-modal').classList.add('show');
+        }
+
+        function closePaywall() {
+            document.getElementById('paywall-modal').classList.remove('show');
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.background = isSuccess ? 'rgba(106, 27, 154, 0.95)' : 'rgba(198, 40, 40, 0.95)';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function submitLead(event) {
+            event.preventDefault();
+            const name = document.getElementById('lead-name').value;
+            const email = document.getElementById('lead-email').value;
+            const phone = document.getElementById('lead-phone').value;
+
+            if (!email.endsWith('@gmail.com')) {
+                showToast('ขออภัย! ระบบรองรับการลงทะเบียนด้วยบัญชี @gmail.com เท่านั้น', false);
+                return;
+            }
+
+            writeConsole(`บันทึก Lead ผู้พัฒนาสำเร็จ: ${name} (${email})`);
+
+            // Simulate Webhook Lead Sync
+            fetch('https://httpbin.org/post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, phone, campaign: 'kongsuk5_vtuber' })
+            })
+            .then(res => {
+                showToast('ลงทะเบียนสำเร็จ! พิมพ์เขียวการตั้งค่าส่งไปทาง Gmail แล้ว');
+                document.getElementById('lead-form').reset();
+            })
+            .catch(err => {
+                showToast('ลงทะเบียนสำเร็จ (โหมดออฟไลน์บันทึกแล้ว)');
+            });
+        }
+
+        function simulateSlipUpload() {
+            writeConsole('กำลังตรวจสอบวิเคราะห์สลิปชำระเงินโอนบอท...');
+            setTimeout(() => {
+                isPro = true;
+                document.getElementById('app-mode-badge').style.display = 'inline-block';
+                document.getElementById('upgrade-pro-btn').style.display = 'none';
+                closePaywall();
+                showToast('อัปเกรดเป็นรุ่น PRO LIFETIME สำเร็จแล้ว! ยินดีต้อนรับเข้าสู่อาณาจักรระดับพรีเมียม');
+                writeConsole('ระบบตรวจพบสลิปชำระเงินถูกต้อง ปลดล็อกช่องทาง API เสียง ElevenLabs PRO สำเร็จ!');
+            }, 1500);
+        }
+
+        function respondWithVTuber() {
+            if (talkInterval) {
+                clearInterval(talkInterval);
+            }
+
+            if (!isPro && respondCount >= 2) {
+                openPaywall();
+                writeConsole('การใช้งานทดลองจำลองครบ 2 ครั้งแล้ว! กรุณาอัปเกรดรุ่น PRO เพื่อตอบแชทต่อ');
+                return;
+            }
+
+            respondCount++;
+
+            const question = document.getElementById('selected-question').value;
+            const char = document.getElementById('char-select').value;
+            const accent = document.getElementById('speech-select').value;
+
+            writeConsole(`ส่งคำถามเข้า AI Brain...`);
+            
+            // Set UI dots to thinking
+            const statusDot = document.getElementById('monitor-status-dot');
+            statusDot.className = 'status-dot speaking';
+            document.getElementById('monitor-status-text').innerText = 'กำลังประมวลคำตอบ...';
+
+            const startTime = Date.now();
+
+            // Attempt to fetch real API
+            fetch('http://127.0.0.1:9090/api/respond', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question, personality: char, accent: accent })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const latency = Date.now() - startTime;
+                    const tokensUsed = Math.floor(Math.random() * 80) + 60;
+                    handleResponse(data.answer, latency, tokensUsed);
+                } else {
+                    throw new Error(data.error || 'API Error');
+                }
+            })
+            .catch(err => {
+                // Fallback simulation if local server is offline
+                console.log("Local API Offline, running simulation", err);
+                setTimeout(() => {
+                    let answer = "";
+                    let tokensUsed = Math.floor(Math.random() * 120) + 80;
+                    let latency = Math.floor(Math.random() * 300) + 150;
+
+                    if (char === 'guru') {
+                        answer = "สำหรับคำถามนี้ครับ การเซ็ตระบบสตรีม Live AI VTuber 24 ชั่วโมงนั้น ไม่ยากอย่างที่คิดครับ หากมีพิมพ์เขียว OBS และสายเสียง VAC การตั้งค่าจะเสร็จใน 10 นาทีครับ ค่าใช้จ่าย API จริงก็ตกเพียงเดือนละ 100-300 บาทเท่านั้น ขึ้นกับจำนวนคอมเมนต์ครับ";
+                    } else if (char === 'funny') {
+                        answer = "ฮ่าๆ โฮ้ยยยย คำถามนี้เฉียบมากเพื่อน! เรื่องเสียงและปากขยับ VTube Studio มันมีฟีเจอร์ Lip Sync จับเสียงไมค์อยู่แล้ว แค่ต่อสัญญาณเสียง TTS เข้า Virtual Cable โมเดลน้องอวตารก็พูดไปกระดิกหูไปชิลๆ เลยจ้า จริตจะก้านสุดปัง!";
+                    } else {
+                        answer = "สวัสดีค่าทุกคน! สำหรับการตั้งค่าทั้งหมด แวะดาวน์โหลดชุดโปรแกรม Node.js ดูดคอมเมนต์ได้ฟรีเลยนะคะ และหากเชื่อมเสียงพูดสุดพรีเมียมของ ElevenLabs ก็จะทำให้ไลฟ์ของเราดูมีเสน่ห์และเป็นธรรมชาติสุดๆ เลยค่า!";
+                    }
+
+                    if (accent === 'th-mix') {
+                        answer += " Let's make it easy and smart with AI VTuber Streamer!";
+                    } else if (accent === 'th-local') {
+                        answer += " สบายบรื๋อเลยจ้า ลองเอาไปทำตามกันดูเด้อ!";
+                    }
+                    
+                    handleResponse(answer, latency, tokensUsed);
+                }, 1200);
+            });
+        }
+
+        function handleResponse(answer, latency, tokensUsed) {
+            const statusDot = document.getElementById('monitor-status-dot');
+            
+            // Update Telemetry
+            tokenAccumulated += tokensUsed;
+            document.getElementById('tele-token').innerText = tokenAccumulated + ' tkn';
+            document.getElementById('tele-latency').innerText = latency + ' ms';
+            document.getElementById('tele-viewers').innerText = (120 + Math.floor(Math.random() * 20)) + ' คน';
+
+            writeConsole(`AI ประมวลผลเสร็จสิ้น (Latency: ${latency}ms, ใช้ไป: ${tokensUsed} tokens)`);
+            document.getElementById('monitor-status-text').innerText = 'กำลังพ่นเสียงตอบกลับ...';
+            
+            // Typing effect in console
+            document.getElementById('console-output').innerHTML = `> AI VTuber ตอบกลับ: "${answer}"`;
+
+            // Mouth talk animation & sound wave show
+            const mouth = document.getElementById('mouth');
+            const waves = document.getElementById('wave-overlay');
+            mouth.className = 'avatar-mouth talking';
+            waves.style.display = 'flex';
+
+            let speakDuration = 4000 + (answer.length * 40); // speak time simulation
+            setTimeout(() => {
+                mouth.className = 'avatar-mouth';
+                waves.style.display = 'none';
+                statusDot.className = 'status-dot active';
+                document.getElementById('monitor-status-text').innerText = 'พร้อมใช้งาน';
+                writeConsole('สตรีมเสียงตอบแชทเสร็จสมบูรณ์... สแตนด์บายรอรับแชทใหม่');
+            }, speakDuration);
+        }
+    </script>
+</body>
+</html>
