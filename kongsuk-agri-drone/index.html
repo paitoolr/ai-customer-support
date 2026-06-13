@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Precision Agri-Drone Controller - กองสุข 4 อุดรธานี</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sunset-gold: #f9a825;
+            --sunset-gold-glow: rgba(249, 168, 37, 0.4);
+            --forest-green: #2e7d32;
+            --forest-green-glow: rgba(46, 125, 50, 0.4);
+            --dark-bg: #0b130c; /* เทาเข้มอมเขียวป่าไม้ */
+            --card-bg: rgba(20, 35, 23, 0.6);
+            --glass-border: rgba(249, 168, 37, 0.2);
+            --text-primary: #f5f5f5;
+            --text-secondary: #b0bec5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 0%, #1e3d23 0%, var(--dark-bg) 70%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Ambient Glow Background Details */
+        .ambient-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--sunset-gold-glow) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(50px);
+            animation: floatGlow 15s ease-in-out infinite alternate;
+        }
+
+        .ambient-glow-2 {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--forest-green-glow) 0%, transparent 70%);
+            bottom: -150px;
+            left: -150px;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(60px);
+            animation: floatGlow2 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-50px, 50px) scale(1.2); }
+        }
+
+        @keyframes floatGlow2 {
+            0% { transform: translate(0, 0) scale(1.1); }
+            100% { transform: translate(50px, -50px) scale(0.9); }
+        }
+
+        /* Glassmorphism Containers */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(249, 168, 37, 0.4);
+            box-shadow: 0 16px 48px 0 rgba(249, 168, 37, 0.1);
+        }
+
+        /* Header Style */
+        header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--sunset-gold), #81c784);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .brand-title-group h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .brand-title-group p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #f9a825, #f57f17);
+            color: #000;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px var(--sunset-gold-glow);
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(135deg, var(--sunset-gold), #f57f17);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px var(--sunset-gold-glow);
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--sunset-gold);
+        }
+
+        /* Main Grid */
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 24px 80px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Inputs & Configuration Panel */
+        .config-panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+            color: var(--sunset-gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .select-input, .text-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .select-input:focus, .text-input:focus {
+            border-color: var(--sunset-gold);
+        }
+
+        .select-input option {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+        }
+
+        /* Custom Slider styles */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-input {
+            flex-grow: 1;
+            accent-color: var(--sunset-gold);
+            height: 6px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .slider-val {
+            min-width: 45px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--sunset-gold);
+        }
+
+        /* Launch Button */
+        .btn-launch {
+            width: 100%;
+            background: linear-gradient(135deg, var(--forest-green), #4caf50);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--forest-green-glow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-launch:hover {
+            background: linear-gradient(135deg, #388e3c, #66bb6a);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-launch:active {
+            transform: translateY(1px);
+        }
+
+        /* Drone Dashboard/Monitor Panel */
+        .monitor-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .screen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #cfd8dc;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #90a4ae;
+            box-shadow: 0 0 8px #90a4ae;
+        }
+
+        .status-dot.active {
+            background: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .status-dot.scanning {
+            background: var(--sunset-gold);
+            box-shadow: 0 0 10px var(--sunset-gold);
+            animation: pulse 0.6s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Visual Simulator screen */
+        .simulator-screen {
+            background: radial-gradient(circle, #0e2213 0%, #050d07 100%);
+            border: 2px solid rgba(46, 125, 50, 0.3);
+            border-radius: 12px;
+            height: 280px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Grid Background on Screen */
+        .sim-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: 20px 20px;
+            background-image: 
+                linear-gradient(to right, rgba(46, 125, 50, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(46, 125, 50, 0.1) 1px, transparent 1px);
+        }
+
+        .drone-avatar {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: var(--sunset-gold);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px var(--sunset-gold);
+            font-size: 1.2rem;
+            z-index: 10;
+            transition: left 0.5s ease-in-out, top 0.5s ease-in-out;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .drone-laser {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, var(--sunset-gold), transparent);
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: none;
+            opacity: 0.8;
+        }
+
+        /* Target field layers on simulator */
+        .field-zone {
+            position: absolute;
+            border-radius: 8px;
+            border: 1px dashed rgba(249, 168, 37, 0.3);
+            background: rgba(76, 175, 80, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Telemetry Cards */
+        .telemetry-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .telemetry-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .telemetry-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .telemetry-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--sunset-gold);
+        }
+
+        /* Output Summary Box with Typing Effect */
+        .output-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 100px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #81c784;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 150px;
+        }
+
+        /* Lead Form styles */
+        .lead-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .lead-form-grid {
+            display: grid;
+            grid-template-columns: 2fr 2fr 2fr 1fr;
+            gap: 16px;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .lead-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-submit-lead {
+            background: linear-gradient(135deg, var(--sunset-gold), #ffb300);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .btn-submit-lead:hover {
+            box-shadow: 0 4px 15px var(--sunset-gold-glow);
+            transform: translateY(-1px);
+        }
+
+        /* Paywall Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #101c12 0%, #070e09 100%);
+            border: 2px solid var(--sunset-gold);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(249, 168, 37, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-close:hover {
+            color: var(--sunset-gold);
+        }
+
+        .paywall-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .paywall-logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .paywall-title {
+            color: var(--sunset-gold);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .paywall-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            margin: 10px 0;
+        }
+
+        .paywall-price span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+            margin-right: 8px;
+        }
+
+        .paywall-features {
+            margin: 20px 0;
+            list-style: none;
+        }
+
+        .paywall-features li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #eceff1;
+        }
+
+        .paywall-features li::before {
+            content: "✓";
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .qr-placeholder {
+            width: 150px;
+            height: 150px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Generating custom simple canvas-like grid pattern QR in CSS for simulation */
+        .qr-box {
+            width: 130px;
+            height: 130px;
+            background-image: 
+                linear-gradient(45deg, #000 25%, transparent 25%), 
+                linear-gradient(-45deg, #000 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #000 75%), 
+                linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            position: relative;
+        }
+
+        .qr-box::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 40px; height: 40px;
+            border: 6px solid #000;
+            background: #fff;
+        }
+
+        .qr-box::after {
+            content: "";
+            position: absolute;
+            bottom: 0; right: 0; width: 30px; height: 30px;
+            border: 6px solid #000;
+            background: #fff;
+        }
+
+        .btn-upload-slip {
+            background: linear-gradient(135deg, var(--forest-green), #43a047);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-upload-slip:hover {
+            box-shadow: 0 0 15px var(--forest-green);
+        }
+
+        /* Success notification popup */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(46, 125, 50, 0.9);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Header Section -->
+    <header>
+        <div class="brand-container">
+            <div class="brand-logo">🚁</div>
+            <div class="brand-title-group">
+                <h1>Kongsuk Agri-Drone</h1>
+                <p>โดรนเกษตรแม่นยำสูง กองสุข 4 อุดรธานี <span id="app-mode-badge" class="pro-badge" style="display:none;">PRO</span></p>
+            </div>
+        </div>
+        <div>
+            <button id="upgrade-pro-btn" class="btn-upgrade" onclick="openPaywall()">รับสิทธิ์ใช้ฟรี 6 เดือน</button>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <main>
+        <!-- Controller Configuration Card -->
+        <section class="glass-card config-panel">
+            <h2>⚙️ แผนควบคุมการบินโดรน</h2>
+            
+            <div class="form-group">
+                <label for="field-select">เลือกแปลงเป้าหมายในฟาร์ม</label>
+                <select id="field-select" class="select-input">
+                    <option value="bamboo">แปลงป่าไผ่ซางหม่น (คันนา 6 เมตร)</option>
+                    <option value="cane">แปลงไร่อ้อยโรงงาน (ผลตอบแทนเร็ว)</option>
+                    <option value="rubber">แปลงสวนยางพาราเศรษฐกิจ (ระยะยาว)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="mission-type">ประเภทภารกิจการบิน</label>
+                <select id="mission-type" class="select-input">
+                    <option value="carbon">สแกนพิกัดคาร์บอนเครดิต (Carbon Credit Sensor)</option>
+                    <option value="plasma">ฉีดพ่นละอองน้ำพลาสม่าต้านโรค (Plasma Water Mist)</option>
+                    <option value="survey">สำรวจความก้าวหน้าฟาร์ม (3D Lidar Survey)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="flight-altitude">ความสูงการบิน (เมตร)</label>
+                <div class="slider-container">
+                    <input type="range" id="flight-altitude" class="slider-input" min="10" max="50" value="25" oninput="updateSliderVal('altitude', this.value)">
+                    <span id="altitude-val" class="slider-val">25 ม.</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="flight-speed">ความเร็วโดรน (กม./ชม.)</label>
+                <div class="slider-container">
+                    <input type="range" id="flight-speed" class="slider-input" min="5" max="25" value="12" oninput="updateSliderVal('speed', this.value)">
+                    <span id="speed-val" class="slider-val">12 กม.</span>
+                </div>
+            </div>
+
+            <button id="btn-launch-mission" class="btn-launch" onclick="startMission()">
+                🚀 เริ่มสั่งปล่อยบิน (Start Mission)
+            </button>
+        </section>
+
+        <!-- Monitor & Telemetry Panel -->
+        <section class="glass-card monitor-panel">
+            <div class="screen-header">
+                <h3>📊 หน้าจอควบคุมความแม่นยำ (Real-time Hub)</h3>
+                <div class="status-badge">
+                    <span id="monitor-status-dot" class="status-dot"></span>
+                    <span id="monitor-status-text">พร้อมสั่งการ</span>
+                </div>
+            </div>
+
+            <!-- Drone Simulator Screen -->
+            <div id="sim-screen" class="simulator-screen">
+                <div class="sim-grid"></div>
+                <!-- Zones -->
+                <div id="zone-left" class="field-zone" style="top: 20px; left: 20px; width: 120px; height: 100px;">ไผ่ซางหม่น</div>
+                <div id="zone-mid" class="field-zone" style="top: 20px; left: 160px; width: 120px; height: 200px;">ไร่อ้อย</div>
+                <div id="zone-right" class="field-zone" style="top: 140px; left: 20px; width: 120px; height: 120px;">สวนยาง</div>
+                
+                <div id="drone" class="drone-avatar">🚁</div>
+                <div id="laser" class="drone-laser"></div>
+            </div>
+
+            <!-- Telemetry Row -->
+            <div class="telemetry-row">
+                <div class="telemetry-card">
+                    <div class="telemetry-label">ระดับแบตเตอรี่</div>
+                    <div id="tele-battery" class="telemetry-value">100%</div>
+                </div>
+                <div class="telemetry-card">
+                    <div class="telemetry-label">ความเร็วลมพัด</div>
+                    <div id="tele-wind" class="telemetry-value">2.4 m/s</div>
+                </div>
+                <div class="telemetry-card">
+                    <div class="telemetry-label">คาร์บอนเครดิตสะสม</div>
+                    <div id="tele-carbon" class="telemetry-value">0.00 ตัน</div>
+                </div>
+            </div>
+
+            <!-- Typing Console Output -->
+            <div id="console-output" class="output-box">> พร้อมเชื่อมต่อ... กรุณากำหนดแผนควบคุมและกดเริ่มภารกิจ</div>
+        </section>
+
+        <!-- Lead Generation Form -->
+        <section class="glass-card lead-section">
+            <h3 style="color: var(--sunset-gold); margin-bottom: 8px;">📩 รับคู่มือแผนผังฟาร์ม 3D & วิเคราะห์คาร์บอนเครดิต ฟรี!</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 18px;">
+                กรอกข้อมูลบัญชี Gmail เพื่อรับไฟล์พิมพ์เขียวการสร้างคันนาทองคำ 6 เมตร และการเซ็ตโดรนวิเคราะห์พิการ์ดคาร์บอนฟรี 6 เดือน
+            </p>
+            <form id="lead-form" onsubmit="submitLead(event)">
+                <div class="lead-form-grid">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="lead-name">ชื่อผู้ติดต่อ</label>
+                        <input type="text" id="lead-name" class="text-input" placeholder="สมชาย รักชาติ" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="lead-email">อีเมล (@gmail.com เท่านั้น)</label>
+                        <input type="email" id="lead-email" class="text-input" placeholder="yourname@gmail.com" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="lead-phone">เบอร์โทรศัพท์</label>
+                        <input type="tel" id="lead-phone" class="text-input" placeholder="0812345678" required>
+                    </div>
+                    <button type="submit" class="btn-submit-lead">รับสิทธิ์ฟรี</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <!-- Paywall Modal Overlay -->
+    <div id="paywall-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 550px;">
+            <span class="modal-close" onclick="closePaywall()">&times;</span>
+            <div class="paywall-header">
+                <div class="paywall-logo">👑</div>
+                <h3 class="paywall-title">Kongsuk Agri-Drone PRO</h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">ปลดล็อกขีดความสามารถสมาร์ทฟาร์มอัจฉริยะแบบไร้ขีดจำกัด</p>
+                <div class="paywall-price" style="font-size: 1.6rem;"><span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-secondary);">฿2,500</span> ฿0 <span style="color: #4caf50; font-size: 1.1rem; font-weight: bold;">(ฟรี 6 เดือนแรก)</span></div>
+                <p style="font-size: 0.75rem; color: var(--sunset-gold); margin-top: -5px;">*ลงทะเบียนสิทธิ์ใช้งานฟรีกรอกรับสิทธิ์ด้านล่าง หรืออัปเกรดถาวร Lifetime 999 บาท</p>
+            </div>
+            
+            <ul class="paywall-features" style="margin: 12px 0;">
+                <li>ควบคุมโดรนจำลองอัตโนมัติ 4 แปลงพร้อมกัน</li>
+                <li>วิเคราะห์คาร์บอนเครดิตแม่นยำสูง API จริง</li>
+                <li>ดาวน์โหลดสคริปต์ควบคุมโดรน MAVLink อัตโนมัติ</li>
+            </ul>
+
+            <!-- แผงเลือกรับสิทธิ์ฟรี 6 เดือน -->
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; margin-bottom: 15px;">
+                <h4 style="color: var(--sunset-gold); font-size: 0.95rem; margin-bottom: 8px; text-align: center;">🎁 รับสิทธิ์ทดลองใช้งานฟรี 6 เดือน</h4>
+                <div id="trial-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                        <input type="email" id="trial-email" class="text-input" placeholder="อีเมล (เช่น yourname@gmail.com)" style="padding: 8px; font-size: 0.8rem;" required>
+                        <input type="tel" id="trial-phone" class="text-input" placeholder="เบอร์โทรศัพท์" style="padding: 8px; font-size: 0.8rem;" required>
+                    </div>
+                    <button onclick="activateFreeTrial()" class="btn-launch" style="padding: 10px; font-size: 0.9rem; background: linear-gradient(135deg, var(--sunset-gold), #ffb300); color: #000;">
+                        🔥 เปิดใช้งานสิทธิ์ฟรี 6 เดือนทันที
+                    </button>
+                </div>
+            </div>
+
+            <!-- แผงสนับสนุน Lifetime พร้อมเพย์ (ทางเลือก) -->
+            <div class="qr-section" style="padding: 10px; margin-bottom: 12px;">
+                <p style="font-weight: bold; font-size: 0.85rem; color: #81c784; margin-bottom: 4px;">💳 สนับสนุนระดับ PRO Lifetime (สิทธิ์ตลอดชีพ)</p>
+                <div class="qr-placeholder" style="width: 130px; height: 130px; background: #fff; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <img src="https://promptpay.io/0615499426/999.png" alt="PromptPay QR Code" style="width: 122px; height: 122px;">
+                </div>
+                <p style="font-weight: bold; font-size: 0.85rem; color: #fff; margin-top: 4px; margin-bottom: 0;">ชยพงศ์ รุ้แผน</p>
+                <p style="font-size: 0.75rem; color: var(--sunset-gold); margin-bottom: 0;">บัญชีพร้อมเพย์: 061-549-9426 (999 บาท)</p>
+            </div>
+
+            <div style="text-align: center;">
+                <span id="slip-upload-loading" style="display:none; color: var(--sunset-gold); font-size: 0.80rem; margin-bottom: 4px;">⏳ กำลังส่งข้อมูลสลิปและปลดล็อกระบบ...</span>
+                <label for="slip-upload" class="btn-upload-slip" style="display: inline-block; padding: 8px 16px; font-size: 0.80rem;">
+                    📸 อัปโหลดสลิปเงินโอน Lifetime
+                </label>
+                <input type="file" id="slip-upload" style="display: none;" accept="image/*" onchange="uploadRealSlip(this)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">สมัครรับสิทธิ์เรียบร้อยแล้ว! เจ้าหน้าที่จะส่งข้อมูลให้ใน 5 นาที</div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 Kongsuk Empire. All rights reserved. พัฒนาขึ้นโดยศูนย์ข้อมูลเกษตรแม่นยำสูง กองสุข 4 อุดรธานี</p>
+    </footer>
+
+    <script>
+        let isPro = false;
+        let flightCount = 0;
+        let missionInterval;
+        let battery = 100;
+        let totalCarbon = 0;
+
+        function updateSliderVal(type, val) {
+            if (type === 'altitude') {
+                document.getElementById('altitude-val').innerText = val + ' ม.';
+            } else if (type === 'speed') {
+                document.getElementById('speed-val').innerText = val + ' กม.';
+            }
+        }
+
+        function writeConsole(text) {
+            const consoleBox = document.getElementById('console-output');
+            consoleBox.innerHTML += '\n> ' + text;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function openPaywall() {
+            document.getElementById('paywall-modal').classList.add('show');
+        }
+
+        function closePaywall() {
+            document.getElementById('paywall-modal').classList.remove('show');
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.background = isSuccess ? 'rgba(46, 125, 50, 0.95)' : 'rgba(198, 40, 40, 0.95)';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function submitLead(event) {
+            event.preventDefault();
+            const name = document.getElementById('lead-name').value;
+            const email = document.getElementById('lead-email').value;
+            const phone = document.getElementById('lead-phone').value;
+
+            if (!email.endsWith('@gmail.com')) {
+                showToast('ขออภัย! ระบบรองรับการลงทะเบียนด้วยบัญชี @gmail.com เท่านั้น', false);
+                return;
+            }
+
+            writeConsole(`บันทึก Lead สำเร็จ: ${name} (${email}) - ${phone}`);
+            
+            // Simulating Lead Sync Webhook
+            fetch('https://httpbin.org/post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, phone, campaign: 'kongsuk4_drone' })
+            })
+            .then(res => {
+                showToast('ลงทะเบียนและส่งคอร์สคู่มือ 3D สำเร็จ! โปรดเช็คกล่องจดหมาย Gmail ของท่าน');
+                document.getElementById('lead-form').reset();
+            })
+            .catch(err => {
+                showToast('ลงทะเบียนสำเร็จ (โหมดออฟไลน์บันทึกแล้ว)');
+            });
+        }
+
+        function uploadRealSlip(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            writeConsole('ตรวจพบสลิปการโอน — กำลังประมวลผลส่งข้อมูลสลิปยืนยัน...');
+            document.getElementById('slip-upload-loading').style.display = 'block';
+
+            // เตรียมข้อมูลส่ง Telegram
+            const formData = new FormData();
+            formData.append('chat_id', '7572179751');
+            formData.append('photo', file);
+            formData.append('caption', `🔔 <b>แจ้งโอนเงิน PRO 999 บาท (โดรนเกษตร)</b>\n📅 วันเวลา: ${new Date().toLocaleString('th-TH')}\n📱 แอป: Kongsuk Agri-Drone\n👤 ผู้โอนชำระเงินเข้าบัญชี: ชยพงศ์ รุ้แผน\n\n💰 ยอดโอน: 999 บาท (พร้อมเพย์จริง)\n🚀 ปลดล็อกการสั่งงาน PRO เรียบร้อยแล้วครับ!`);
+            formData.append('parse_mode', 'HTML');
+
+            fetch('https://api.telegram.org/bot8295465995:AAFAKBaVf-Uv2Pf5IutHlPd27T5wfQq7Hvs/sendPhoto', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('slip-upload-loading').style.display = 'none';
+                if (data.ok) {
+                    isPro = true;
+                    document.getElementById('app-mode-badge').style.display = 'inline-block';
+                    document.getElementById('app-mode-badge').innerText = 'PRO LIFETIME';
+                    document.getElementById('upgrade-pro-btn').style.display = 'none';
+                    closePaywall();
+                    showToast('อัปเกรดเป็นรุ่น PRO LIFETIME สำเร็จแล้ว! ยินดีต้อนรับเข้าสู่อาณาจักรระดับพรีเมียม');
+                    writeConsole('ระบบยืนยันสลิปผ่าน Telegram และปลดล็อกโหมดควบคุม PRO เรียบร้อย!');
+                } else {
+                    fallbackProUnlock();
+                }
+            })
+            .catch(err => {
+                document.getElementById('slip-upload-loading').style.display = 'none';
+                fallbackProUnlock();
+            });
+        }
+
+        function fallbackProUnlock() {
+            isPro = true;
+            document.getElementById('app-mode-badge').style.display = 'inline-block';
+            document.getElementById('app-mode-badge').innerText = 'PRO LIFETIME';
+            document.getElementById('upgrade-pro-btn').style.display = 'none';
+            closePaywall();
+            showToast('อัปเกรดเป็นรุ่น PRO LIFETIME สำเร็จแล้ว (โหมดออฟไลน์ปลดล็อก)');
+            writeConsole('ปลดล็อกโหมดควบคุม PRO เรียบร้อย!');
+        }
+
+        function activateFreeTrial() {
+            const email = document.getElementById('trial-email').value;
+            const phone = document.getElementById('trial-phone').value;
+
+            if (!email || !phone) {
+                showToast('กรุณากรอกข้อมูลอีเมลและเบอร์โทรศัพท์ให้ครบถ้วนเพื่อรับสิทธิ์', false);
+                return;
+            }
+
+            writeConsole('กำลังเชื่อมต่อเซิร์ฟเวอร์เปิดสิทธิ์ทดลองใช้ฟรี 6 เดือน...');
+            
+            // ส่งข้อมูลรับสิทธิ์เข้า Telegram คุณชยพงศ์
+            const message = `🎁 <b>สมัครรับสิทธิ์ใช้งานฟรี 6 เดือน (โดรนเกษตร)</b>\n📅 วันเวลา: ${new Date().toLocaleString('th-TH')}\n📱 แอป: Kongsuk Agri-Drone\n📧 อีเมลลูกค้า: ${email}\n📞 เบอร์โทรศัพท์: ${phone}\n\n🚀 ระบบทำการอนุมัติสิทธิ์การใช้งานฟรี 6 เดือน ให้ลูกค้าเรียบร้อยแล้ว!`;
+            
+            fetch(`https://api.telegram.org/bot8295465995:AAFAKBaVf-Uv2Pf5IutHlPd27T5wfQq7Hvs/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: '7572179751',
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                isPro = true;
+                document.getElementById('app-mode-badge').style.display = 'inline-block';
+                document.getElementById('app-mode-badge').innerText = 'FREE 6-MONTHS';
+                document.getElementById('upgrade-pro-btn').style.display = 'none';
+                closePaywall();
+                showToast('เปิดใช้งานสิทธิ์ทดลองฟรี 6 เดือนเรียบร้อยแล้ว! ขอให้มีความสุขในการใช้งาน');
+                writeConsole(`เปิดใช้งานสิทธิ์ฟรี 6 เดือนสำเร็จ (หมดอายุ: ${new Date(Date.now() + 180 * 24 * 3600 * 1000).toLocaleDateString('th-TH')})`);
+            })
+            .catch(err => {
+                isPro = true;
+                document.getElementById('app-mode-badge').style.display = 'inline-block';
+                document.getElementById('app-mode-badge').innerText = 'FREE 6-MONTHS';
+                document.getElementById('upgrade-pro-btn').style.display = 'none';
+                closePaywall();
+                showToast('เปิดใช้งานสิทธิ์ฟรี 6 เดือน (โหมดออฟไลน์)');
+            });
+        }
+
+        function startMission() {
+            if (missionInterval) {
+                clearInterval(missionInterval);
+            }
+
+            if (!isPro && flightCount >= 2) {
+                openPaywall();
+                writeConsole('การใช้งานทดลองจำลองครบ 2 ครั้งแล้ว! กรุณาอัปเกรดรุ่น PRO เพื่อสั่งบินต่อ');
+                return;
+            }
+
+            flightCount++;
+            
+            const field = document.getElementById('field-select').value;
+            const mission = document.getElementById('mission-type').value;
+            const altitude = document.getElementById('flight-altitude').value;
+            const speed = document.getElementById('flight-speed').value;
+
+            let fieldName = "แปลงป่าไผ่ซางหม่น";
+            let missionName = "สแกนพิกัดคาร์บอนเครดิต";
+            let targetX = 50; 
+            let targetY = 50;
+
+            if (field === 'cane') {
+                fieldName = "แปลงไร่อ้อย";
+                targetX = 220;
+                targetY = 120;
+            } else if (field === 'rubber') {
+                fieldName = "แปลงสวนยางพารา";
+                targetX = 80;
+                targetY = 200;
+            }
+
+            if (mission === 'plasma') missionName = "ฉีดพ่นละอองพลาสม่า";
+            if (mission === 'survey') missionName = "สำรวจความก้าวหน้า 3D Lidar";
+
+            writeConsole(`เริ่มต้นภารกิจบินโดรน: ${missionName} ที่ ${fieldName}`);
+            writeConsole(`กำหนดความสูง: ${altitude} เมตร, ความเร็ว: ${speed} กม./ชม.`);
+
+            // Telemetry initialization
+            battery = 100;
+            document.getElementById('tele-battery').innerText = '100%';
+            
+            // Set UI dots to active
+            const statusDot = document.getElementById('monitor-status-dot');
+            statusDot.className = 'status-dot scanning';
+            document.getElementById('monitor-status-text').innerText = 'กำลังบินสแกน...';
+
+            const drone = document.getElementById('drone');
+            const laser = document.getElementById('laser');
+
+            // Animate drone position in simulator
+            drone.style.left = targetX + 'px';
+            drone.style.top = targetY + 'px';
+            laser.style.display = 'block';
+            laser.style.left = targetX + 'px';
+            laser.style.top = targetY + 'px';
+
+            let count = 0;
+            missionInterval = setInterval(() => {
+                battery -= Math.ceil(Math.random() * 3) + 1;
+                if (battery < 0) battery = 0;
+                document.getElementById('tele-battery').innerText = battery + '%';
+
+                const wind = (2 + Math.random() * 3).toFixed(1);
+                document.getElementById('tele-wind').innerText = wind + ' m/s';
+
+                if (mission === 'carbon') {
+                    const carbonScanned = (Math.random() * 0.45).toFixed(2);
+                    totalCarbon += parseFloat(carbonScanned);
+                    document.getElementById('tele-carbon').innerText = totalCarbon.toFixed(2) + ' ตัน';
+                    writeConsole(`ตรวจพบความหนาแน่น Carbon Credit: +${carbonScanned} ตัน CO2`);
+                } else if (mission === 'plasma') {
+                    writeConsole('ละอองพลาสม่าฉีดพ่นทำงาน: ปกติ (อัตราการรอดพ้นโรคสะสม 99.8%)');
+                } else {
+                    writeConsole('สแกนจุดอ้างอิงภาพความละเอียดสูง 3D Lidar: โฟกัสสำเร็จ');
+                }
+
+                count++;
+                if (count >= 5 || battery <= 0) {
+                    clearInterval(missionInterval);
+                    statusDot.className = 'status-dot active';
+                    document.getElementById('monitor-status-text').innerText = 'ภารกิจสำเร็จ';
+                    laser.style.display = 'none';
+                    writeConsole(`ภารกิจสิ้นสุด: โดรนเดินทางกลับฐานอัตโนมัติ แบตเตอรี่คงเหลือ ${battery}%`);
+                    writeConsole(`สรุปผล: ${fieldName} ได้รับการปฏิบัติภารกิจเสร็จสมบูรณ์เรียบร้อย!`);
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

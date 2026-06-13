@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Smart Farm Monitor - ระบบควบคุมสมาร์ทฟาร์มอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #03080e;
+            --card-bg: rgba(7, 21, 38, 0.45);
+            --card-border: rgba(30, 144, 255, 0.2);
+            --primary-glow: #00ccff;
+            --primary-glow-rgb: 0, 204, 255;
+            --secondary-glow: #9dff00; /* เขียวตองอ่อน Eco */
+            --text-main: #f0f8ff;
+            --text-muted: #96afc9;
+            --accent-gold: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 100, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(157, 255, 0, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #010408 0%, #030a12 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--primary-glow) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.02;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            width: 100%;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Glassmorphism Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(4, 12, 24, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 1.2rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--primary-glow);
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+            animation: float 3s ease-in-out infinite alternate;
+        }
+
+        .brand-title h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #ffffff, var(--primary-glow), var(--secondary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .badge-pro {
+            display: none;
+            background: linear-gradient(135deg, var(--accent-gold), #ffa500);
+            color: #1a0f00;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-free {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(135deg, #00d2ff, #0077ff);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 119, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 119, 255, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 204, 255, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 204, 255, 0.08);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.75rem;
+        }
+
+        .card-title-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary-glow);
+            text-shadow: 0 0 8px rgba(0, 204, 255, 0.4);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary-glow);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--secondary-glow);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        /* Metric Grid */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 204, 255, 0.15);
+        }
+
+        .metric-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3rem;
+        }
+
+        .icon-water { background: rgba(0, 119, 255, 0.15); color: #0099ff; }
+        .icon-temp { background: rgba(255, 69, 0, 0.15); color: #ff5e00; }
+        .icon-ph { background: rgba(157, 255, 0, 0.15); color: var(--secondary-glow); }
+        .icon-solar { background: rgba(255, 215, 0, 0.15); color: var(--accent-gold); }
+
+        .metric-info h5 {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        /* Interactive Controls */
+        .controls-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .control-row:hover {
+            background: rgba(0, 204, 255, 0.02);
+            border-color: rgba(0, 204, 255, 0.1);
+        }
+
+        .control-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .control-label i {
+            width: 20px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .control-name h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .control-name p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-glow);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--primary-glow);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Chart Placeholder / Premium Section */
+        .chart-section {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 8, 14, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem;
+            z-index: 5;
+        }
+
+        .chart-lock-overlay i {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+            animation: float 2s ease-in-out infinite alternate;
+        }
+
+        .chart-lock-overlay p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .btn-unlock-chart {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-unlock-chart:hover {
+            background: var(--accent-gold);
+            color: #03080e;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .chart-placeholder-img {
+            width: 100%;
+            height: 100%;
+            opacity: 0.45;
+            object-fit: cover;
+        }
+
+        /* Lead generator */
+        .lead-section {
+            margin-top: 2rem;
+            background: linear-gradient(135deg, rgba(4, 18, 35, 0.7), rgba(2, 8, 16, 0.7));
+            border: 1px dashed var(--primary-glow);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .lead-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .lead-section p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+        }
+
+        .lead-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .lead-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lead-form input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .lead-form input:focus {
+            border-color: var(--primary-glow);
+        }
+
+        .btn-submit-lead {
+            background: var(--primary-glow);
+            color: #03080e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit-lead:hover {
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
+            filter: brightness(1.1);
+        }
+
+        /* Paywall Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(1, 4, 8, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #051221, #02070e);
+            border: 2px solid rgba(0, 204, 255, 0.3);
+            box-shadow: 0 0 50px rgba(0, 204, 255, 0.15);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 550px;
+            padding: 2.5rem;
+            position: relative;
+            animation: modalScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: #ffffff;
+        }
+
+        .paywall-icon {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 1rem;
+            animation: spinGlow 4s linear infinite;
+        }
+
+        .paywall-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ffffff, var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .paywall-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .pro-benefits-list {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pro-benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .pro-benefit-item i {
+            color: var(--accent-gold);
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-placeholder {
+            width: 160px;
+            height: 160px;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .price-tag {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+        }
+
+        .price-tag span {
+            font-size: 0.85rem;
+            text-decoration: line-through;
+            color: var(--text-muted);
+            margin-right: 8px;
+            font-weight: 400;
+        }
+
+        .upload-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-glow);
+            background: rgba(0, 204, 255, 0.03);
+        }
+
+        .upload-section input {
+            display: none;
+        }
+
+        .upload-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .upload-text i {
+            font-size: 1.25rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .btn-confirm-pay {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-gold), #ffa500);
+            color: #1a0f00;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25);
+        }
+
+        .btn-confirm-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* Live Activity Log */
+        .log-section {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 1.25rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 180px;
+            overflow-y: auto;
+            color: #a8c3df;
+        }
+
+        .log-line {
+            margin-bottom: 6px;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            padding-left: 8px;
+        }
+
+        .log-time {
+            color: var(--primary-glow);
+            margin-right: 6px;
+        }
+
+        /* Toast */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #05182e;
+            border: 1px solid var(--primary-glow);
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 16px;
+            position: fixed;
+            z-index: 200;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        /* Keyframe animations */
+        @keyframes modalScaleUp {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-6px); }
+        }
+
+        @keyframes spinGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+            50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); }
+            100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(4, 12, 24, 0.4);
+        }
+
+        footer a {
+            color: var(--primary-glow);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Header Section -->
+        <header>
+            <div class="logo-section">
+                <i class="fa-solid fa-satellite-dish logo-icon"></i>
+                <div class="brand-title">
+                    <h1>ระบบควบคุมและมอนิเตอร์สมาร์ทฟาร์ม</h1>
+                    <p>Kongsuk Smart Farm Monitor (Saraburi)</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="badge-free" id="tier-badge">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> ข้อมูลฟรีไลฟ์
+                </div>
+                <div class="badge-pro" id="pro-badge">
+                    <i class="fa-solid fa-crown"></i> สมาชิกควบคุม PRO
+                </div>
+                <button class="btn-upgrade" id="btn-header-upgrade" onclick="openPaywall()">
+                    <i class="fa-solid fa-arrow-up-to-line"></i> อัปเกรดควบคุม PRO
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- Column 1: Metrics & Logs -->
+            <div>
+                <!-- Metric Panel -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h3 class="card-title">
+                        <span class="card-title-text"><i class="fa-solid fa-tower-broadcast"></i> สถานะเซนเซอร์ IoT</span>
+                        <span class="pulse-dot"></span>
+                    </h3>
+                    
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-water"><i class="fa-solid fa-droplet"></i></div>
+                            <div class="metric-info">
+                                <h5>ระดับน้ำบ่อปลาชะโอน</h5>
+                                <span class="metric-value" id="val-water">82%</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-temp"><i class="fa-solid fa-temperature-half"></i></div>
+                            <div class="metric-info">
+                                <h5>อุณหภูมิน้ำบ่อปลา</h5>
+                                <span class="metric-value" id="val-temp">28.2°C</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-ph"><i class="fa-solid fa-flask-vial"></i></div>
+                            <div class="metric-info">
+                                <h5>ค่ากรด-ด่าง (pH Level)</h5>
+                                <span class="metric-value" id="val-ph">7.15</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-solar"><i class="fa-solid fa-solar-panel"></i></div>
+                            <div class="metric-info">
+                                <h5>ผลิตไฟฟ้า Solar Roof</h5>
+                                <span class="metric-value" id="val-solar">12.8 kW</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Chart Section -->
+                    <div class="chart-section">
+                        <div class="chart-lock-overlay" id="chart-lock">
+                            <i class="fa-solid fa-lock"></i>
+                            <p>ฟังก์ชันรายงานกราฟแนวโน้มและการวิเคราะห์คุณภาพน้ำระดับสูง จำกัดเฉพาะสมาชิก PRO เท่านั้น</p>
+                            <button class="btn-unlock-chart" onclick="openPaywall()">ปลดล็อกเพื่อเข้าถึง</button>
+                        </div>
+                        <!-- Canvas/Image placeholder for dynamic chart simulation -->
+                        <div style="width: 100%; height: 180px; display: flex; align-items: flex-end; justify-content: space-between; padding: 10px;">
+                            <div style="width: 8%; height: 40%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 45%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 35%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 60%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 75%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 70%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 85%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 95%; background: var(--secondary-glow); border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal Log -->
+                <div class="card">
+                    <h3 class="card-title">
+                        <span class="card-title-text"><i class="fa-solid fa-terminal"></i> บันทึกกิจกรรมระบบ (System Log)</span>
+                    </h3>
+                    <div class="log-section" id="log-container">
+                        <div class="log-line"><span class="log-time">[20:15:02]</span> เชื่อมต่อพอร์ต 9999 (Health API Server) สำเร็จ</div>
+                        <div class="log-line"><span class="log-time">[20:15:10]</span> tailscale-vpn: เชื่อมต่อเครื่อง Sony Master (100.118.150.54) สำเร็จ</div>
+                        <div class="log-line"><span class="log-time">[20:20:00]</span> Solar Roof 20kW ประหยัดค่าไฟฟ้าสะสมของสัปดาห์นี้ +2,150 บาท</div>
+                        <div class="log-line"><span class="log-time">[20:22:45]</span> บ่อ Biofloc ปลาชะโอน: เปิดใช้ Plasma Water เพื่อระบบน้ำสะอาดสูงสุด</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2: Controls -->
+            <div class="card">
+                <h3 class="card-title">
+                    <span class="card-title-text"><i class="fa-solid fa-gamepad"></i> แผงสั่งการฟาร์ม</span>
+                </h3>
+                
+                <div class="controls-list">
+                    <!-- Control 1 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-shrimp" style="color:#ffaa00"></i>
+                            <div class="control-name">
+                                <h4>เครื่องให้อาหารปลา</h4>
+                                <p>ระบบออโต้ให้อาหารแบบจำกัด</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="ctrl-feed" onchange="toggleControl('ctrl-feed', 'เครื่องให้อาหารปลา')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Control 2 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-wind" style="color:#00ffb7"></i>
+                            <div class="control-name">
+                                <h4>ระบบพ่นหมอกความเย็น</h4>
+                                <p>ปรับอุณหภูมิและความชื้นรอบบ่อ</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="ctrl-fog" onchange="toggleControl('ctrl-fog', 'ระบบพ่นหมอกความเย็น')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Control 3 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-faucet-drip" style="color:#00bfff"></i>
+                            <div class="control-name">
+                                <h4>วาล์วปล่อยน้ำเข้าบ่อ</h4>
+                                <p>เพิ่มระดับน้ำในกรณีน้ำพ่องตัว</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="ctrl-valve" onchange="toggleControl('ctrl-valve', 'วาล์วปล่อยน้ำเข้าบ่อ')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Control 4 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-shield-halved" style="color:#ffa500"></i>
+                            <div class="control-name">
+                                <h4>ระบบจ่ายไฟฟ้าสำรอง (Hybrid Solar)</h4>
+                                <p>ทำงานเมื่อไฟกริดหลักขัดข้อง</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked id="ctrl-backup" onchange="toggleControl('ctrl-backup', 'ระบบจ่ายไฟฟ้าสำรอง')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <p style="font-size:0.75rem; color:var(--text-muted);">*สถานะทั้งหมดเชื่อมข้อมูลกับ n8n API และ sync อัตโนมัติทุก 30 วินาที</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Lead Form Section -->
+        <section class="lead-section">
+            <h3><i class="fa-solid fa-code"></i> สมัครเพื่อรับ IoT API Key และเอกสารเทคนิค</h3>
+            <p>กรอกข้อมูลอีเมล Gmail ของท่านเพื่อรับโทเค็นคีย์เชื่อมต่อบอร์ด ESP32/Arduino ควบคุมบ่อปลาและระบบสมาร์ทฟาร์มกองสุขฟรี</p>
+            <form class="lead-form" onsubmit="submitLead(event)">
+                <input type="text" placeholder="ชื่อวิศวกร/ผู้ใช้งาน" required id="lead-name">
+                <input type="email" placeholder="อีเมล (เฉพาะ @gmail.com เท่านั้น)" required id="lead-email">
+                <button type="submit" class="btn-submit-lead">ขอรับสิทธิ์ฟรี</button>
+            </form>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 🏰 <a href="#">กองสุข Empire</a> - พัฒนาแอปพลิเคชันพรีเมียมวันละหนึ่งแอปด้วยรักและความประณีต</p>
+        </footer>
+
+    </div>
+
+    <!-- Premium Paywall Modal -->
+    <div class="modal" id="paywall-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePaywall()"><i class="fa-solid fa-xmark"></i></button>
+            <i class="fa-solid fa-crown paywall-icon"></i>
+            <h2 class="paywall-title">สิทธิ์การควบคุมระดับสูง (PRO CONTROL)</h2>
+            <p class="paywall-subtitle">ปลดล็อกระบบมอนิเตอร์และวิเคราะห์คุณภาพน้ำเชิงลึกแบบเรียลไทม์ 24 ชม.</p>
+            
+            <div class="pro-benefits-list">
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ปลดล็อกกราฟแนวโน้มเซนเซอร์ (ระดับน้ำ, อุณหภูมิ, pH, โซล่าเซลล์) ย้อนหลัง 30 วัน</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ไม่จำกัดจำนวนครั้งการสั่งเปิด-ปิดแผงสวิตช์ IoT ในระบบต่อวัน</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ระบบแจ้งเตือนระดับวิกฤตผ่าน Telegram Unified Bot ทันทีเมื่อ pH ผิดปกติ</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> เชื่อมต่อ Webhook API ของระบบภายนอกได้อิสระ</div>
+            </div>
+
+            <div class="price-tag">
+                <span>1,990.-</span> 999 บาท เท่านั้น (สิทธิ์ครอบคลุมตลอดชีพ)
+            </div>
+
+            <div class="qr-section">
+                <p style="font-size:0.85rem; color:var(--text-muted);">สแกนจ่ายเงินจำลองเพื่อสมัครสิทธิ์ PRO</p>
+                <div class="qr-placeholder">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KongsukSmartMonitor999" alt="QR Code Payment Simulation">
+                </div>
+                <p style="font-size:0.75rem; color:var(--accent-gold); font-weight: 600;">บัญชีบริษัท กองสุข โฮลดิ้ง จำกัด (จำลอง)</p>
+            </div>
+
+            <div class="upload-section" onclick="triggerSlipUpload()">
+                <input type="file" id="slip-file" onchange="handleSlipFile(event)">
+                <div class="upload-text" id="slip-upload-text">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>อัปโหลดรูปภาพสลิปโอนเงินจำลองที่นี่เพื่อขอยืนยันสิทธิ์ทันที</span>
+                </div>
+            </div>
+
+            <button class="btn-confirm-pay" onclick="confirmPayment()">
+                ยืนยันการชำระเงินและเปิดสิทธิ์ PRO
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">การดำเนินการสำเร็จ</div>
+
+    <script>
+        let isPro = false;
+        let controlCount = 0;
+
+        // Auto sensor simulation
+        setInterval(function() {
+            if (!isPro) return; // Only pro gets active dynamic numbers
+            
+            // Water
+            const waterEl = document.getElementById("val-water");
+            let waterVal = parseFloat(waterEl.innerText);
+            waterVal += (Math.random() - 0.5) * 0.4;
+            waterEl.innerText = waterVal.toFixed(1) + "%";
+
+            // Temp
+            const tempEl = document.getElementById("val-temp");
+            let tempVal = parseFloat(tempEl.innerText);
+            tempVal += (Math.random() - 0.5) * 0.1;
+            tempEl.innerText = tempVal.toFixed(1) + "°C";
+
+            // pH
+            const phEl = document.getElementById("val-ph");
+            let phVal = parseFloat(phEl.innerText);
+            phVal += (Math.random() - 0.5) * 0.02;
+            phEl.innerText = phVal.toFixed(2);
+
+            // Solar
+            const solarEl = document.getElementById("val-solar");
+            let solarVal = parseFloat(solarEl.innerText);
+            solarVal += (Math.random() - 0.5) * 0.2;
+            if (solarVal < 0) solarVal = 0;
+            if (solarVal > 20) solarVal = 20;
+            solarEl.innerText = solarVal.toFixed(1) + " kW";
+
+        }, 3000);
+
+        function addLog(message) {
+            const container = document.getElementById("log-container");
+            const timeStr = new Date().toLocaleTimeString('th-TH', { hour12: false });
+            const logLine = document.createElement("div");
+            logLine.className = "log-line";
+            logLine.innerHTML = `<span class="log-time">[${timeStr}]</span> ${message}`;
+            container.appendChild(logLine);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleControl(id, name) {
+            const checked = document.getElementById(id).checked;
+            
+            if (!isPro) {
+                controlCount++;
+                if (controlCount > 2) {
+                    // Revert check state
+                    document.getElementById(id).checked = !checked;
+                    openPaywall();
+                    return;
+                }
+            }
+
+            const stateText = checked ? "🟢 เปิดการทำงาน" : "🔴 ปิดการทำงาน";
+            addLog(`สวิตช์สั่งการ [${name}] เปลี่ยนสถานะเป็น: ${stateText}`);
+            showToast(`สั่งการ ${name} -> ${checked ? 'เปิด' : 'ปิด'} สำเร็จ`);
+        }
+
+        function openPaywall() {
+            document.getElementById("paywall-modal").style.display = "flex";
+        }
+
+        function closePaywall() {
+            document.getElementById("paywall-modal").style.display = "none";
+        }
+
+        function triggerSlipUpload() {
+            document.getElementById("slip-file").click();
+        }
+
+        function handleSlipFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById("slip-upload-text").innerHTML = `<i class="fa-solid fa-file-image" style="color:var(--primary-glow)"></i><span style="color:var(--primary-glow)">เลือกสลิปสำเร็จ: ${file.name} (พร้อมยืนยัน)</span>`;
+            }
+        }
+
+        function confirmPayment() {
+            isPro = true;
+            closePaywall();
+            document.getElementById("tier-badge").style.display = "none";
+            document.getElementById("pro-badge").style.display = "flex";
+            document.getElementById("btn-header-upgrade").style.display = "none";
+            document.getElementById("chart-lock").style.display = "none";
+            
+            addLog("👑 ยืนยันสิทธิ์ควบคุมพรีเมียมระดับ PRO ตลอดชีพสำเร็จ!");
+            showToast("👑 อัปเกรดระบบควบคุม PRO ตลอดชีพสำเร็จแล้ว!");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "toast show";
+            setTimeout(function() {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+
+        function submitLead(event) {
+            event.preventDefault();
+            const email = document.getElementById("lead-email").value;
+            const name = document.getElementById("lead-name").value;
+
+            if (!email.toLowerCase().endsWith("@gmail.com")) {
+                showToast("❌ ระบบรองรับเฉพาะอีเมล Gmail (@gmail.com) เท่านั้นตามนโยบายกองสุข");
+                return;
+            }
+
+            showToast(`🟢 ยินดีต้อนรับวิศวกร ${name}! รหัส IoT API Token ถูกส่งไปที่ ${email} เรียบร้อย`);
+            addLog(`ส่งออก IoT API credentials สำหรับวิศวกร: ${name} (${email})`);
+            document.getElementById("lead-email").value = "";
+            document.getElementById("lead-name").value = "";
+        }
+    </script>
+</body>
+</html>

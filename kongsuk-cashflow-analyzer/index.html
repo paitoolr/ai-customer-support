@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Cash Flow Analyzer - ระบบวิเคราะห์กระแสเงินสดอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #050d05;
+            --card-bg: rgba(12, 30, 12, 0.45);
+            --card-border: rgba(34, 139, 34, 0.2);
+            --primary-glow: #00ff66;
+            --primary-glow-rgb: 0, 255, 102;
+            --secondary-glow: #39ff14;
+            --text-main: #f0fff0;
+            --text-muted: #a3cfa3;
+            --accent-gold: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(12, 50, 12, 0.3) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 40, 30, 0.4) 0%, transparent 50%),
+                linear-gradient(180deg, #020702 0%, #051005 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Ambient neon particles background simulation */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--primary-glow) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            width: 100%;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Glassmorphism Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 25, 10, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 1.2rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--primary-glow);
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+            animation: pulse 2s infinite alternate;
+        }
+
+        .brand-title h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #ffffff, var(--primary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .badge-pro {
+            display: none;
+            background: linear-gradient(135deg, var(--accent-gold), #ffa500);
+            color: #1a0f00;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-free {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(135deg, #00ff66, #00bb44);
+            color: #020b02;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 255, 102, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 102, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 255, 102, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 255, 102, 0.08);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.75rem;
+        }
+
+        .card-title i {
+            color: var(--primary-glow);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+        }
+
+        /* Forms Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 14px 10px 40px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-header span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .slider-value {
+            color: var(--primary-glow) !important;
+            font-weight: 700;
+        }
+
+        .slider-input {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-glow);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.8);
+            transition: transform 0.1s ease;
+        }
+
+        .slider-input::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        /* Modular Tabs inside Calc */
+        .tabs-header {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 1.5rem;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 255, 102, 0.15);
+            color: var(--primary-glow);
+            border: 1px solid rgba(0, 255, 102, 0.25);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        /* Action Button */
+        .btn-calc {
+            width: 100%;
+            background: linear-gradient(135deg, #00ff66, #00d254);
+            color: #020b02;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0, 255, 102, 0.35);
+        }
+
+        .btn-calc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 102, 0.6);
+            filter: brightness(1.15);
+        }
+
+        /* Result Panel Styling */
+        .result-panel {
+            min-height: 480px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+
+        .result-empty i {
+            font-size: 3rem;
+            margin-bottom: 1.25rem;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite alternate;
+        }
+
+        .result-active {
+            display: none;
+            flex: 1;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .total-flow-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .total-flow-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--primary-glow);
+            text-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+        }
+
+        .breakdown-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .breakdown-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .breakdown-item:hover {
+            background: rgba(0, 255, 102, 0.04);
+            border-color: rgba(0, 255, 102, 0.15);
+            transform: translateX(4px);
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(0, 255, 102, 0.1);
+            color: var(--primary-glow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .item-name h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .item-name p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .item-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        /* Lead Generator Section */
+        .lead-section {
+            margin-top: 2rem;
+            background: linear-gradient(135deg, rgba(10, 35, 15, 0.6), rgba(5, 20, 5, 0.6));
+            border: 1px dashed var(--primary-glow);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .lead-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .lead-section p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+        }
+
+        .lead-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .lead-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lead-form input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .lead-form input:focus {
+            border-color: var(--primary-glow);
+        }
+
+        .btn-submit-lead {
+            background: var(--primary-glow);
+            color: #020b02;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit-lead:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+            filter: brightness(1.1);
+        }
+
+        /* Interactive Output Message */
+        .ai-assistant-card {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            display: flex;
+            gap: 12px;
+        }
+
+        .ai-avatar {
+            font-size: 1.4rem;
+            color: var(--primary-glow);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .typing-effect {
+            border-right: 2px solid var(--primary-glow);
+            white-space: pre-wrap;
+            animation: caret 0.75s step-end infinite;
+        }
+
+        /* Premium Paywall Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 8, 2, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #091c09, #040d04);
+            border: 2px solid rgba(0, 255, 102, 0.3);
+            box-shadow: 0 0 50px rgba(0, 255, 102, 0.15);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 550px;
+            padding: 2.5rem;
+            position: relative;
+            animation: modalScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: #ffffff;
+        }
+
+        .paywall-icon {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 1rem;
+            animation: spinGlow 4s linear infinite;
+        }
+
+        .paywall-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ffffff, var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .paywall-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .pro-benefits-list {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pro-benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .pro-benefit-item i {
+            color: var(--accent-gold);
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-placeholder {
+            width: 160px;
+            height: 160px;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .price-tag {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+        }
+
+        .price-tag span {
+            font-size: 0.85rem;
+            text-decoration: line-through;
+            color: var(--text-muted);
+            margin-right: 8px;
+            font-weight: 400;
+        }
+
+        .upload-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-glow);
+            background: rgba(0, 255, 102, 0.03);
+        }
+
+        .upload-section input {
+            display: none;
+        }
+
+        .upload-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .upload-text i {
+            font-size: 1.25rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .btn-confirm-pay {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-gold), #ffa500);
+            color: #1a0f00;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25);
+        }
+
+        .btn-confirm-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* Success Popup */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #0c2e0a;
+            border: 1px solid var(--primary-glow);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 16px;
+            position: fixed;
+            z-index: 200;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalScaleUp {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); text-shadow: 0 0 10px rgba(0, 255, 102, 0.4); }
+            100% { transform: scale(1.05); text-shadow: 0 0 20px rgba(0, 255, 102, 0.7); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-8px); }
+        }
+
+        @keyframes spinGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+            50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); }
+            100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+        }
+
+        @keyframes caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--primary-glow); }
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(5, 15, 5, 0.4);
+        }
+
+        footer a {
+            color: var(--primary-glow);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Header Section -->
+        <header>
+            <div class="logo-section">
+                <i class="fa-solid fa-chart-line-up logo-icon"></i>
+                <div class="brand-title">
+                    <h1>วิเคราะห์กระแสเงินสดกองสุข</h1>
+                    <p>Kongsuk Cash Flow Analyzer</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="badge-free" id="tier-badge">
+                    <i class="fa-solid fa-circle-user"></i> เวอร์ชันใช้งานฟรี
+                </div>
+                <div class="badge-pro" id="pro-badge">
+                    <i class="fa-solid fa-crown"></i> สมาชิกระดับ PRO
+                </div>
+                <button class="btn-upgrade" id="btn-header-upgrade" onclick="openPaywall()">
+                    <i class="fa-solid fa-arrow-up-to-line"></i> อัปเกรด PRO 999.-
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Dashboard -->
+        <div class="dashboard-grid">
+            
+            <!-- Column 1: Input controls -->
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fa-solid fa-sliders"></i> ตั้งค่าการจำลองพอร์ต
+                </h3>
+                
+                <!-- Tab Controls -->
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchTab(event, 'gongsuk1')">กองสุข 1</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'gongsuk2')">กองสุข 2</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'gongsuk3')">กองสุข 3</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'gongsuk4')">กองสุข 4</button>
+                </div>
+
+                <!-- Tab Content: Kongsuk 1 -->
+                <div id="gongsuk1" class="tab-content active">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>จำนวนห้องเช่า (ห้อง)</span>
+                            <span class="slider-value" id="val-g1-rooms">4 ห้อง</span>
+                        </div>
+                        <input type="range" min="1" max="20" value="4" class="slider-input" id="g1-rooms" oninput="updateVal('g1-rooms', 'val-g1-rooms', ' ห้อง')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>อัตราค่าเช่าเฉลี่ยต่อห้อง (บาท/เดือน)</span>
+                            <span class="slider-value" id="val-g1-rent">2,500 บาท</span>
+                        </div>
+                        <input type="range" min="1500" max="6000" step="100" value="2500" class="slider-input" id="g1-rent" oninput="updateVal('g1-rent', 'val-g1-rent', ' บาท', true)">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>ผลผลิตนาข้าวอินทรีย์ต่อปี (กิโลกรัม)</span>
+                            <span class="slider-value" id="val-g1-rice">1,200 กก.</span>
+                        </div>
+                        <input type="range" min="0" max="5000" step="100" value="1200" class="slider-input" id="g1-rice" oninput="updateVal('g1-rice', 'val-g1-rice', ' กก.', true)">
+                    </div>
+                </div>
+
+                <!-- Tab Content: Kongsuk 2 -->
+                <div id="gongsuk2" class="tab-content">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>จำนวนบ้านพักน็อคดาวน์ (หลัง)</span>
+                            <span class="slider-value" id="val-g2-cabins">4 หลัง</span>
+                        </div>
+                        <input type="range" min="1" max="10" value="4" class="slider-input" id="g2-cabins" oninput="updateVal('g2-cabins', 'val-g2-cabins', ' หลัง')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>อัตราการเข้าพักเฉลี่ย (Occupancy)</span>
+                            <span class="slider-value" id="val-g2-occ">40%</span>
+                        </div>
+                        <input type="range" min="10" max="100" step="5" value="40" class="slider-input" id="g2-occ" oninput="updateVal('g2-occ', 'val-g2-occ', '%')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>ขนาด Solar Roof (kW)</span>
+                            <span class="slider-value" id="val-g2-solar">20 kW</span>
+                        </div>
+                        <input type="range" min="5" max="50" step="5" value="20" class="slider-input" id="g2-solar" oninput="updateVal('g2-solar', 'val-g2-solar', ' kW')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>จำนวนปลาชะโอนที่เลี้ยง (ตัว)</span>
+                            <span class="slider-value" id="val-g2-fish">5,000 ตัว</span>
+                        </div>
+                        <input type="range" min="1000" max="20000" step="500" value="5000" class="slider-input" id="g2-fish" oninput="updateVal('g2-fish', 'val-g2-fish', ' ตัว', true)">
+                    </div>
+                </div>
+
+                <!-- Tab Content: Kongsuk 3 -->
+                <div id="gongsuk3" class="tab-content">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>จำนวนก้อนเชื้อเห็ดลอยฟ้า (ก้อน)</span>
+                            <span class="slider-value" id="val-g3-mushrooms">25,000 ก้อน</span>
+                        </div>
+                        <input type="range" min="5000" max="50000" step="1000" value="25000" class="slider-input" id="g3-mushrooms" oninput="updateVal('g3-mushrooms', 'val-g3-mushrooms', ' ก้อน', true)">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>เปอร์เซ็นต์แปรรูปเป็น Freeze Dry</span>
+                            <span class="slider-value" id="val-g3-freeze">35%</span>
+                        </div>
+                        <input type="range" min="10" max="100" step="5" value="35" class="slider-input" id="g3-freeze" oninput="updateVal('g3-freeze', 'val-g3-freeze', '%')">
+                    </div>
+                </div>
+
+                <!-- Tab Content: Kongsuk 4 -->
+                <div id="gongsuk4" class="tab-content">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>พื้นที่ปลูกไผ่ซางหม่น (ไร่)</span>
+                            <span class="slider-value" id="val-g4-bamboo">12 ไร่</span>
+                        </div>
+                        <input type="range" min="1" max="50" value="12" class="slider-input" id="g4-bamboo" oninput="updateVal('g4-bamboo', 'val-g4-bamboo', ' ไร่')">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>ปริมาณการกักเก็บคาร์บอนต่อไร่ (ตัน CO2/ปี)</span>
+                            <span class="slider-value" id="val-g4-carbon">7.3 ตัน</span>
+                        </div>
+                        <input type="range" min="1" max="15" step="0.1" value="7.3" class="slider-input" id="g4-carbon" oninput="updateVal('g4-carbon', 'val-g4-carbon', ' ตัน')">
+                    </div>
+                </div>
+
+                <button class="btn-calc" onclick="calculateCashFlow()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> คำนวณกระแสเงินสดรวม
+                </button>
+            </div>
+
+            <!-- Column 2: Output and AI suggestion -->
+            <div class="card result-panel">
+                <h3 class="card-title">
+                    <i class="fa-solid fa-chart-pie"></i> รายงานวิเคราะห์กระแสเงินสด
+                </h3>
+
+                <!-- Empty state -->
+                <div class="result-empty" id="empty-state">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <p>กรุณาตั้งค่าค่าจำลองพอร์ตที่แท็บซ้าย แล้วกดปุ่มเพื่อเริ่มประมวลผลวิเคราะห์กระแสเงินสดจำลอง</p>
+                </div>
+
+                <!-- Active State -->
+                <div class="result-active" id="active-state">
+                    <div class="result-header">
+                        <span class="total-flow-label">กระแสเงินสดรวมเฉลี่ยสะสมรายเดือน:</span>
+                        <span class="total-flow-value" id="res-total">0.00 บาท</span>
+                    </div>
+
+                    <div class="breakdown-list">
+                        <!-- Kongsuk 1 -->
+                        <div class="breakdown-item">
+                            <div class="item-info">
+                                <div class="item-icon"><i class="fa-solid fa-house-chimney"></i></div>
+                                <div class="item-name">
+                                    <h4>กองสุข 1 (อยุธยา)</h4>
+                                    <p>รายได้ห้องเช่า + ลดค่าใช้จ่ายเกษตรในฟาร์ม</p>
+                                </div>
+                            </div>
+                            <span class="item-value" id="res-g1">0 บาท</span>
+                        </div>
+                        <!-- Kongsuk 2 -->
+                        <div class="breakdown-item">
+                            <div class="item-info">
+                                <div class="item-icon"><i class="fa-solid fa-water"></i></div>
+                                <div class="item-name">
+                                    <h4>กองสุข 2 (สระบุรี)</h4>
+                                    <p>โฮมสเตย์ริมน้ำ + พลังงานแสงอาทิตย์ + เลี้ยงปลา</p>
+                                </div>
+                            </div>
+                            <span class="item-value" id="res-g2">0 บาท</span>
+                        </div>
+                        <!-- Kongsuk 3 -->
+                        <div class="breakdown-item">
+                            <div class="item-info">
+                                <div class="item-icon"><i class="fa-solid fa-crop"></i></div>
+                                <div class="item-name">
+                                    <h4>กองสุข 3 (ลพบุรี)</h4>
+                                    <p>เห็ดหลินจือแปรรูปแห้ง Freeze Dry ไฮเทค</p>
+                                </div>
+                            </div>
+                            <span class="item-value" id="res-g3">0 บาท</span>
+                        </div>
+                        <!-- Kongsuk 4 -->
+                        <div class="breakdown-item">
+                            <div class="item-info">
+                                <div class="item-icon"><i class="fa-solid fa-leaf"></i></div>
+                                <div class="item-name">
+                                    <h4>กองสุข 4 (อุดรธานี)</h4>
+                                    <p>ปลูกป่าไผ่เชิงเศรษฐกิจ + คาร์บอนเครดิต</p>
+                                </div>
+                            </div>
+                            <span class="item-value" id="res-g4">0 บาท</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Pinky Comment Simulation -->
+                    <div class="ai-assistant-card">
+                        <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div>
+                            <strong>Pinky AI Assistant:</strong>
+                            <p class="typing-effect" id="ai-comment">กำลังวิเคราะห์แนวทางพอร์ต...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Lead Form -->
+        <section class="lead-section">
+            <h3><i class="fa-solid fa-envelope-open-text"></i> ลงทะเบียนรับรายงานแผนการเงินกองสุขฟรี</h3>
+            <p>กรอกข้อมูลอีเมล Gmail ของท่านเพื่อรับคู่มือการทำเกษียณพรีเมียมและรับสิทธิ์ทดลองใช้บอตเทรด EA นามกองสุขฟรี 6 เดือน</p>
+            <form class="lead-form" onsubmit="submitLead(event)">
+                <input type="text" placeholder="ชื่อผู้ใช้งาน" required id="lead-name">
+                <input type="email" placeholder="อีเมล (เฉพาะ @gmail.com เท่านั้น)" required id="lead-email">
+                <button type="submit" class="btn-submit-lead">รับสิทธิ์ฟรีทันที</button>
+            </form>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 🏰 <a href="#">กองสุข Empire</a> - พัฒนาแอปพลิเคชันพรีเมียมวันละหนึ่งแอปด้วยรักและความประณีต</p>
+        </footer>
+
+    </div>
+
+    <!-- Premium Paywall Modal -->
+    <div class="modal" id="paywall-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePaywall()"><i class="fa-solid fa-xmark"></i></button>
+            <i class="fa-solid fa-crown paywall-icon"></i>
+            <h2 class="paywall-title">ปลดล็อกระบบวิเคราะห์ขั้นสูง (PRO)</h2>
+            <p class="paywall-subtitle">สิทธิ์การใช้งานแบบตลอดชีพ (Lifetime Access) ปลดล็อกขีดจำกัดการจำลองพอร์ต</p>
+            
+            <div class="pro-benefits-list">
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ไม่จำกัดจำนวนการคลิกคำนวณและประมวลผลพอร์ตต่อวัน</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> รายงานประเมินกระแสเงินสดเชิงลึกแบบแยกรายละเอียดรายปี</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ตัวช่วยแนะนำการสับเปลี่ยนงบประมาณด้วยอัลกอริทึม Pinky AI ตัวเต็ม</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> รับแผนผังพิมพ์เขียว Smart Farm 3D ทั้ง 4 พื้นที่ฟรีทันที</div>
+            </div>
+
+            <div class="price-tag">
+                <span>1,990.-</span> 999 บาท เท่านั้น (สิทธิ์ขาดตลอดชีพ)
+            </div>
+
+            <div class="qr-section">
+                <p style="font-size:0.85rem; color:var(--text-muted);">สแกนจ่ายเงินจำลองเพื่อสมัครสมาชิก PRO</p>
+                <div class="qr-placeholder">
+                    <!-- Placeholder QR code representing simulation -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KongsukPaywall999" alt="QR Code Payment Simulation">
+                </div>
+                <p style="font-size:0.75rem; color:var(--accent-gold); font-weight: 600;">บัญชีบริษัท กองสุข โฮลดิ้ง จำกัด (จำลอง)</p>
+            </div>
+
+            <div class="upload-section" onclick="triggerSlipUpload()">
+                <input type="file" id="slip-file" onchange="handleSlipFile(event)">
+                <div class="upload-text" id="slip-upload-text">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>อัปโหลดรูปภาพสลิปโอนเงินจำลองที่นี่เพื่อขอยืนยันสิทธิ์ทันที</span>
+                </div>
+            </div>
+
+            <button class="btn-confirm-pay" onclick="confirmPayment()">
+                ยืนยันการชำระเงินและเปิดสิทธิ์ PRO
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">การดำเนินการสำเร็จ</div>
+
+    <script>
+        let isPro = false;
+        let calcCount = 0;
+
+        function switchTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+
+            const tabBtns = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function updateVal(sliderId, valueId, suffix, isCurrency = false) {
+            const val = document.getElementById(sliderId).value;
+            let formattedVal = val;
+            if (isCurrency) {
+                formattedVal = Number(val).toLocaleString();
+            }
+            document.getElementById(valueId).innerText = formattedVal + suffix;
+        }
+
+        function openPaywall() {
+            document.getElementById("paywall-modal").style.display = "flex";
+        }
+
+        function closePaywall() {
+            document.getElementById("paywall-modal").style.display = "none";
+        }
+
+        function triggerSlipUpload() {
+            document.getElementById("slip-file").click();
+        }
+
+        function handleSlipFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById("slip-upload-text").innerHTML = `<i class="fa-solid fa-file-image" style="color:var(--primary-glow)"></i><span style="color:var(--primary-glow)">เลือกสลิปสำเร็จ: ${file.name} (พร้อมยืนยัน)</span>`;
+            }
+        }
+
+        function confirmPayment() {
+            isPro = true;
+            closePaywall();
+            document.getElementById("tier-badge").style.display = "none";
+            document.getElementById("pro-badge").style.display = "flex";
+            document.getElementById("btn-header-upgrade").style.display = "none";
+            showToast("👑 อัปเกรดเป็นระบบ PRO สำเร็จตลอดชีพแล้ว! ยินดีต้อนรับสู่สังคมพรีเมียมกองสุข");
+            
+            // Re-calculate to show PRO-level insights
+            if (calcCount > 0) {
+                calculateCashFlow();
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "toast show";
+            setTimeout(function() {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+
+        function submitLead(event) {
+            event.preventDefault();
+            const email = document.getElementById("lead-email").value;
+            const name = document.getElementById("lead-name").value;
+
+            if (!email.toLowerCase().endsWith("@gmail.com")) {
+                showToast("❌ ระบบรองรับเฉพาะอีเมล Gmail (@gmail.com) เท่านั้นตามนโยบายกองสุข");
+                return;
+            }
+
+            showToast(`🟢 ขอบคุณคุณ ${name}! ระบบลงทะเบียนสำเร็จ และส่งแผนการเงินคู่มือไปยัง ${email} แล้ว`);
+            document.getElementById("lead-email").value = "";
+            document.getElementById("lead-name").value = "";
+        }
+
+        function calculateCashFlow() {
+            // Check limitations for free tier
+            if (!isPro) {
+                calcCount++;
+                if (calcCount > 2) {
+                    openPaywall();
+                    return;
+                }
+            }
+
+            document.getElementById("empty-state").style.display = "none";
+            document.getElementById("active-state").style.display = "block";
+
+            // Extract inputs
+            // Gongsuk 1
+            const g1Rooms = parseInt(document.getElementById("g1-rooms").value);
+            const g1Rent = parseInt(document.getElementById("g1-rent").value);
+            const g1Rice = parseInt(document.getElementById("g1-rice").value);
+            
+            // Gongsuk 2
+            const g2Cabins = parseInt(document.getElementById("g2-cabins").value);
+            const g2Occ = parseInt(document.getElementById("g2-occ").value) / 100;
+            const g2Solar = parseInt(document.getElementById("g2-solar").value);
+            const g2Fish = parseInt(document.getElementById("g2-fish").value);
+
+            // Gongsuk 3
+            const g3Mushrooms = parseInt(document.getElementById("g3-mushrooms").value);
+            const g3Freeze = parseInt(document.getElementById("g3-freeze").value) / 100;
+
+            // Gongsuk 4
+            const g4Bamboo = parseInt(document.getElementById("g4-bamboo").value);
+            const g4Carbon = parseFloat(document.getElementById("g4-carbon").value);
+
+            // Calculations Logic
+            // G1: Room rent + rice saving (approx 30 THB per kg monthly saving)
+            const g1Income = (g1Rooms * g1Rent) + Math.round((g1Rice * 30) / 12);
+
+            // G2: Cabin income (assume 1200 THB/night) + solar saving (approx 450 THB per kW/month) + fish sale (25 THB profit/fish spread across 12 months)
+            const g2Income = Math.round((g2Cabins * 30 * g2Occ * 1200) + (g2Solar * 450) + ((g2Fish * 25) / 12));
+
+            // G3: Mushrooms (yield 0.8 kg/cube/year, fresh sells at 80 THB, Freeze dry sells at 600 THB, cost 15 THB/cube)
+            const mushroomFreshYield = (g3Mushrooms * 0.8 * (1 - g3Freeze));
+            const mushroomFreezeYield = (g3Mushrooms * 0.8 * g3Freeze);
+            const g3Income = Math.round(((mushroomFreshYield * 80) + (mushroomFreezeYield * 600)) / 12);
+
+            // G4: Bamboo (yield 10,000 THB/rai/year) + Carbon credit (carbon * bamboo * 150 THB/ton of CO2/year)
+            const g4Income = Math.round(((g4Bamboo * 12000) + (g4Bamboo * g4Carbon * 500)) / 12);
+
+            const totalIncome = g1Income + g2Income + g3Income + g4Income;
+
+            // Render Output values
+            document.getElementById("res-g1").innerText = g1Income.toLocaleString() + " บาท / เดือน";
+            document.getElementById("res-g2").innerText = g2Income.toLocaleString() + " บาท / เดือน";
+            document.getElementById("res-g3").innerText = g3Income.toLocaleString() + " บาท / เดือน";
+            document.getElementById("res-g4").innerText = g4Income.toLocaleString() + " บาท / เดือน";
+            document.getElementById("res-total").innerText = totalIncome.toLocaleString() + " บาท / เดือน";
+
+            // Generate AI comments
+            let comment = "";
+            if (isPro) {
+                comment = `[วิเคราะห์ระดับ PRO 👑] พอร์ตกระแสเงินสดของคุณสร้างรายได้สะสมสูงถึง ${totalIncome.toLocaleString()} บาท/เดือน (หรือปีละ ${(totalIncome * 12).toLocaleString()} บาท) แนะนำให้สับเปลี่ยนกำไรสุทธิ 15% จากโรงเห็ดกองสุข 3 เข้าซื้อค้ำประกันพอร์ตด้วยที่ดินหรือทำนาข้าวปลอดเคมีกองสุข 1 เพื่อควบคุมระดับ Risk Index เป็น 0.0 เสมอตามระเบียบปฏิบัติของกองสุข Empire`;
+            } else {
+                comment = `พอร์ตกระแสเงินสดจำลองของคุณอยู่ที่ ${totalIncome.toLocaleString()} บาท/เดือน โครงการที่สร้าง Cash Flow เด่นที่สุดคือ ${g2Income > g3Income ? 'กองสุข 2 สระบุรี (ริมน้ำ)' : 'กองสุข 3 ลพบุรี (เห็ดลอยฟ้า)'} เพื่อประสิทธิภาพการวางแผนระดับสูง กรุณาเปิดใช้งานระบบ PRO`;
+            }
+
+            animateComment(comment);
+        }
+
+        function animateComment(text) {
+            const element = document.getElementById("ai-comment");
+            element.innerText = "";
+            let i = 0;
+            function typeWriter() {
+                if (i < text.length) {
+                    element.innerText += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 15);
+                }
+            }
+            typeWriter();
+        }
+    </script>
+</body>
+</html>

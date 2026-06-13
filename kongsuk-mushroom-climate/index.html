@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Smart Mushroom Climate Controller - ระบบควบคุมโรงเห็ดอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0d0303;
+            --card-bg: rgba(30, 8, 8, 0.45);
+            --card-border: rgba(186, 12, 47, 0.2);
+            --primary-glow: #ff2a4b; /* แดงทับทิม Ruby-Red */
+            --primary-glow-rgb: 255, 42, 75;
+            --secondary-glow: #ffd700; /* สีส้มทอง Gold */
+            --text-main: #fff5f5;
+            --text-muted: #d9b8b8;
+            --accent-gold: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(186, 12, 47, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #070101 0%, #120303 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--primary-glow) 1px, transparent 1px);
+            background-size: 60px 60px;
+            opacity: 0.02;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            width: 100%;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Glassmorphism Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(20, 5, 5, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 1.2rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--primary-glow);
+            text-shadow: 0 0 10px rgba(255, 42, 75, 0.5);
+            animation: pulse 2s infinite alternate;
+        }
+
+        .brand-title h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #ffffff, var(--primary-glow), var(--secondary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .badge-pro {
+            display: none;
+            background: linear-gradient(135deg, var(--accent-gold), #ffa500);
+            color: #1a0f00;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-free {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(135deg, #ff2a4b, #cc1130);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(255, 42, 75, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 42, 75, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards and Elements */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 42, 75, 0.3);
+            box-shadow: 0 12px 40px rgba(255, 42, 75, 0.08);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.75rem;
+        }
+
+        .card-title-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary-glow);
+            text-shadow: 0 0 8px rgba(255, 42, 75, 0.4);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-glow);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--primary-glow);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        /* Metric Grid */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 42, 75, 0.15);
+        }
+
+        .metric-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.3rem;
+        }
+
+        .icon-humidity { background: rgba(255, 42, 75, 0.15); color: #ff3355; }
+        .icon-temp { background: rgba(255, 165, 0, 0.15); color: #ffaa00; }
+        .icon-hoist { background: rgba(255, 215, 0, 0.15); color: var(--accent-gold); }
+        .icon-solar { background: rgba(255, 42, 75, 0.1); color: #ff7788; }
+
+        .metric-info h5 {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        /* Controls Panel */
+        .controls-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .control-row:hover {
+            background: rgba(255, 42, 75, 0.02);
+            border-color: rgba(255, 42, 75, 0.1);
+        }
+
+        .control-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .control-label i {
+            width: 20px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .control-name h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .control-name p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-glow);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px rgba(255, 42, 75, 0.5);
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--primary-glow);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Interactive Action Buttons */
+        .btn-hoist-action {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #120303;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn-hoist-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Chart / Premium locking */
+        .chart-section {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 3, 3, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem;
+            z-index: 5;
+        }
+
+        .chart-lock-overlay i {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+            animation: float 2s ease-in-out infinite alternate;
+        }
+
+        .chart-lock-overlay p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .btn-unlock-chart {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-unlock-chart:hover {
+            background: var(--accent-gold);
+            color: #120303;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Lead Generator Section */
+        .lead-section {
+            margin-top: 2rem;
+            background: linear-gradient(135deg, rgba(35, 8, 8, 0.7), rgba(16, 2, 2, 0.7));
+            border: 1px dashed var(--primary-glow);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .lead-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .lead-section p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+        }
+
+        .lead-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .lead-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lead-form input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .lead-form input:focus {
+            border-color: var(--primary-glow);
+        }
+
+        .btn-submit-lead {
+            background: var(--primary-glow);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 42, 75, 0.3);
+        }
+
+        .btn-submit-lead:hover {
+            box-shadow: 0 0 15px rgba(255, 42, 75, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* Paywall Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 2, 2, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #25050a, #0d0103);
+            border: 2px solid rgba(255, 42, 75, 0.3);
+            box-shadow: 0 0 50px rgba(255, 42, 75, 0.15);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 550px;
+            padding: 2.5rem;
+            position: relative;
+            animation: modalScaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: #ffffff;
+        }
+
+        .paywall-icon {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 1rem;
+            animation: spinGlow 4s linear infinite;
+        }
+
+        .paywall-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ffffff, var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .paywall-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .pro-benefits-list {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pro-benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .pro-benefit-item i {
+            color: var(--accent-gold);
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .qr-placeholder {
+            width: 160px;
+            height: 160px;
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .price-tag {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+        }
+
+        .price-tag span {
+            font-size: 0.85rem;
+            text-decoration: line-through;
+            color: var(--text-muted);
+            margin-right: 8px;
+            font-weight: 400;
+        }
+
+        .upload-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-glow);
+            background: rgba(255, 42, 75, 0.03);
+        }
+
+        .upload-section input {
+            display: none;
+        }
+
+        .upload-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .upload-text i {
+            font-size: 1.25rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .btn-confirm-pay {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-gold), #ffa500);
+            color: #1a0f00;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25);
+        }
+
+        .btn-confirm-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+            filter: brightness(1.1);
+        }
+
+        /* Console Logs */
+        .log-section {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 1.25rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 180px;
+            overflow-y: auto;
+            color: #e4c5c5;
+        }
+
+        .log-line {
+            margin-bottom: 6px;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            padding-left: 8px;
+        }
+
+        .log-time {
+            color: var(--primary-glow);
+            margin-right: 6px;
+        }
+
+        /* Toast */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #2b080c;
+            border: 1px solid var(--primary-glow);
+            box-shadow: 0 0 15px rgba(255, 42, 75, 0.4);
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 16px;
+            position: fixed;
+            z-index: 200;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        /* Keyframe animations */
+        @keyframes modalScaleUp {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-6px); }
+        }
+
+        @keyframes spinGlow {
+            0% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+            50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); }
+            100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(20, 5, 5, 0.4);
+        }
+
+        footer a {
+            color: var(--primary-glow);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Header Section -->
+        <header>
+            <div class="logo-section">
+                <i class="fa-solid fa-temperature-arrow-up logo-icon"></i>
+                <div class="brand-title">
+                    <h1>ควบคุมโรงเห็ดลอยฟ้าอัจฉริยะ</h1>
+                    <p>Kongsuk Smart Mushroom Climate Controller (Lopburi)</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="badge-free" id="tier-badge">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> ออนไลน์
+                </div>
+                <div class="badge-pro" id="pro-badge">
+                    <i class="fa-solid fa-crown"></i> สิทธิ์โรงงาน PRO
+                </div>
+                <button class="btn-upgrade" id="btn-header-upgrade" onclick="openPaywall()">
+                    <i class="fa-solid fa-arrow-up-to-line"></i> อัปเกรดควบคุม PRO
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- Column 1: Sensors & Trend -->
+            <div>
+                <!-- Metric Panel -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h3 class="card-title">
+                        <span class="card-title-text"><i class="fa-solid fa-microchip"></i> สถานะเซนเซอร์โรงเห็ด</span>
+                        <span class="pulse-dot"></span>
+                    </h3>
+                    
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-humidity"><i class="fa-solid fa-smog"></i></div>
+                            <div class="metric-info">
+                                <h5>ความชื้นสัมพัทธ์</h5>
+                                <span class="metric-value" id="val-humidity">85.0%</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-temp"><i class="fa-solid fa-thermometer"></i></div>
+                            <div class="metric-info">
+                                <h5>อุณหภูมิในโรงเรือน</h5>
+                                <span class="metric-value" id="val-temp">26.5°C</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-hoist"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="metric-info">
+                                <h5>สถานะ Overhead Hoist</h5>
+                                <span class="metric-value" id="val-hoist">สแตนด์บาย</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon-box icon-solar"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="metric-info">
+                                <h5>ไฟสำรอง Solar Hybrid</h5>
+                                <span class="metric-value" id="val-solar">5.4 kW</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trend Chart Lock -->
+                    <div class="chart-section">
+                        <div class="chart-lock-overlay" id="chart-lock">
+                            <i class="fa-solid fa-lock"></i>
+                            <p>ฟังก์ชันรายงานค่าปริมาณน้ำในอากาศ สถิติการทำงานของรอก และระบบคำนวณรอบเก็บเกี่ยวล่วงหน้า จำกัดเฉพาะสมาชิก PRO เท่านั้น</p>
+                            <button class="btn-unlock-chart" onclick="openPaywall()">ปลดล็อกสิทธิ์ควบคุมระดับสูง</button>
+                        </div>
+                        <div style="width: 100%; height: 180px; display: flex; align-items: flex-end; justify-content: space-between; padding: 10px;">
+                            <div style="width: 8%; height: 35%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 50%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 45%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 65%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 75%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 80%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 85%; background: var(--primary-glow); border-radius: 4px;"></div>
+                            <div style="width: 8%; height: 90%; background: var(--secondary-glow); border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs -->
+                <div class="card">
+                    <h3 class="card-title">
+                        <span class="card-title-text"><i class="fa-solid fa-receipt"></i> บันทึกกิจกรรมโรงงาน (Mushroom Log)</span>
+                    </h3>
+                    <div class="log-section" id="log-container">
+                        <div class="log-line"><span class="log-time">[11:15:02]</span> เชื่อมต่อระบบเครือข่าย VPN Tailscale สำเร็จ (100.85.122.55)</div>
+                        <div class="log-line"><span class="log-time">[11:15:10]</span> โหลดพารามิเตอร์อัตโนมัติ: ตั้งค่าเป้าหมายความชื้น 85% สำเร็จ</div>
+                        <div class="log-line"><span class="log-time">[11:20:00]</span> โรงเพาะก้อนเห็ด 25,000 ก้อน: ตรวจจับสภาพอากาศปิดปกติ</div>
+                        <div class="log-line"><span class="log-time">[11:25:30]</span> ระบบ Hybrid Solar จ่ายไฟสำรองเข้ารงเห็ด: สถานะแบตเตอรี่ 92%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2: Swithes and Controls -->
+            <div class="card">
+                <h3 class="card-title">
+                    <span class="card-title-text"><i class="fa-solid fa-screwdriver-wrench"></i> แผงควบคุมสวิตช์</span>
+                </h3>
+                
+                <div class="controls-list">
+                    <!-- Control 1 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-cloud-rain" style="color:#ff2a4b"></i>
+                            <div class="control-name">
+                                <h4>ระบบพ่นละอองหมอก</h4>
+                                <p>สเปรย์เพิ่มความชื้นสัมพัทธ์</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="ctrl-mist" onchange="toggleMist()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Control 2 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-fan" style="color:#00ffb7"></i>
+                            <div class="control-name">
+                                <h4>พัดลมระบายอากาศ</h4>
+                                <p>ดูดอากาศเพื่อลดความชื้นส่วนเกิน</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="ctrl-fan" onchange="toggleFan()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Control 3 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-arrows-up-down-left-right" style="color:#ffd700"></i>
+                            <div class="control-name">
+                                <h4>รอกเลื่อน Overhead Hoist</h4>
+                                <p>ระบบรางเลื่อนยกตะกร้าเห็ดทุ่นแรง</p>
+                            </div>
+                        </div>
+                        <button class="btn-hoist-action" onclick="runHoist()">
+                            <i class="fa-solid fa-play"></i> สั่งเลื่อนรอก
+                        </button>
+                    </div>
+
+                    <!-- Control 4 -->
+                    <div class="control-row">
+                        <div class="control-label">
+                            <i class="fa-solid fa-circle-nodes" style="color:#00ccff"></i>
+                            <div class="control-name">
+                                <h4>ตัวช่วยกรองความชื้นหมุนเวียน</h4>
+                                <p>ระบบตรวจจับสปอร์เห็ดในอากาศ</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked id="ctrl-spore" onchange="toggleControl('ctrl-spore', 'ระบบตรวจจับสปอร์เห็ด')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <p style="font-size:0.75rem; color:var(--text-muted);">*ควบคุมและมอนิเตอร์ผ่านเซ็นเซอร์ ESP32-S3 (ลพบุรี)</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Lead Form Section -->
+        <section class="lead-section">
+            <h3><i class="fa-solid fa-file-pdf"></i> รับแผนผังวิศวกรรม Overhead Hoist และโรงเห็ด</h3>
+            <p>กรอกข้อมูลอีเมล Gmail ของท่านเพื่อรับคู่มือและแบบพิมพ์เขียวโครงสร้าง 3D สำหรับดีดบ้านและติดตั้งรอกรางเลื่อนทุ่นแรงฟรี</p>
+            <form class="lead-form" onsubmit="submitLead(event)">
+                <input type="text" placeholder="ชื่อผู้ขอรับเอกสาร" required id="lead-name">
+                <input type="email" placeholder="อีเมล (เฉพาะ @gmail.com เท่านั้น)" required id="lead-email">
+                <button type="submit" class="btn-submit-lead">ขอรับไฟล์ดาวน์โหลด</button>
+            </form>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 🏰 <a href="#">กองสุข Empire</a> - พัฒนาแอปพลิเคชันพรีเมียมวันละหนึ่งแอปด้วยรักและความประณีต</p>
+        </footer>
+
+    </div>
+
+    <!-- Premium Paywall Modal -->
+    <div class="modal" id="paywall-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePaywall()"><i class="fa-solid fa-xmark"></i></button>
+            <i class="fa-solid fa-crown paywall-icon"></i>
+            <h2 class="paywall-title">สิทธิ์การควบคุมระดับสูง (PRO CONTROL)</h2>
+            <p class="paywall-subtitle">ปลดล็อกระบบมอนิเตอร์และวิเคราะห์คุณภาพน้ำเชิงลึกแบบเรียลไทม์ 24 ชม.</p>
+            
+            <div class="pro-benefits-list">
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> รายงานสถิติปริมาณน้ำในอากาศและอุณหภูมิโรงเรือนย้อนหลัง 30 วัน</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ไม่จำกัดจำนวนครั้งการสั่งเปิด-ปิดแผงสวิตช์และเรียกรางเลื่อนต่อวัน</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ระบบแจ้งเตือนแจ้งเหตุฉุกเฉินผ่าน Telegram API ทันทีเมื่อไฟขัดข้อง</div>
+                <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> รับแผนผังพิมพ์เขียว Smart Farm 3D ทั้ง 4 พื้นที่ฟรีทันที</div>
+            </div>
+
+            <div class="price-tag">
+                <span>1,990.-</span> 999 บาท เท่านั้น (สิทธิ์ครอบคลุมตลอดชีพ)
+            </div>
+
+            <div class="qr-section">
+                <p style="font-size:0.85rem; color:var(--text-muted);">สแกนจ่ายเงินจำลองเพื่อสมัครสิทธิ์ PRO</p>
+                <div class="qr-placeholder">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KongsukSmartMushroom999" alt="QR Code Payment Simulation">
+                </div>
+                <p style="font-size:0.75rem; color:var(--accent-gold); font-weight: 600;">บัญชีบริษัท กองสุข โฮลดิ้ง จำกัด (จำลอง)</p>
+            </div>
+
+            <div class="upload-section" onclick="triggerSlipUpload()">
+                <input type="file" id="slip-file" onchange="handleSlipFile(event)">
+                <div class="upload-text" id="slip-upload-text">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>อัปโหลดรูปภาพสลิปโอนเงินจำลองที่นี่เพื่อขอยืนยันสิทธิ์ทันที</span>
+                </div>
+            </div>
+
+            <button class="btn-confirm-pay" onclick="confirmPayment()">
+                ยืนยันการชำระเงินและเปิดสิทธิ์ PRO
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">การดำเนินการสำเร็จ</div>
+
+    <script>
+        let isPro = false;
+        let controlCount = 0;
+        let mistActive = false;
+        let fanActive = false;
+
+        // Auto humidity simulation based on switches
+        setInterval(function() {
+            const humidityEl = document.getElementById("val-humidity");
+            const tempEl = document.getElementById("val-temp");
+            
+            let humidityVal = parseFloat(humidityEl.innerText);
+            let tempVal = parseFloat(tempEl.innerText);
+
+            if (mistActive) {
+                // Mist sprayers increase humidity, slightly drop temp
+                humidityVal += 0.5 + Math.random() * 0.3;
+                tempVal -= 0.05 + Math.random() * 0.05;
+                if (humidityVal > 95) humidityVal = 95;
+            } else if (fanActive) {
+                // Exhaust fans decrease humidity, slightly drop/raise temp
+                humidityVal -= 0.6 + Math.random() * 0.2;
+                tempVal -= 0.02 + Math.random() * 0.04;
+                if (humidityVal < 60) humidityVal = 60;
+            } else {
+                // Normal ambient fluctuation
+                humidityVal += (Math.random() - 0.5) * 0.2;
+                tempVal += (Math.random() - 0.5) * 0.05;
+            }
+
+            humidityEl.innerText = humidityVal.toFixed(1) + "%";
+            tempEl.innerText = tempVal.toFixed(1) + "°C";
+
+            // Ambient Solar Fluctuation
+            const solarEl = document.getElementById("val-solar");
+            let solarVal = parseFloat(solarEl.innerText);
+            solarVal += (Math.random() - 0.5) * 0.1;
+            if (solarVal < 0) solarVal = 0;
+            if (solarVal > 10) solarVal = 10;
+            solarEl.innerText = solarVal.toFixed(1) + " kW";
+
+        }, 3000);
+
+        function addLog(message) {
+            const container = document.getElementById("log-container");
+            const timeStr = new Date().toLocaleTimeString('th-TH', { hour12: false });
+            const logLine = document.createElement("div");
+            logLine.className = "log-line";
+            logLine.innerHTML = `<span class="log-time">[${timeStr}]</span> ${message}`;
+            container.appendChild(logLine);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function checkControlLimit() {
+            if (!isPro) {
+                controlCount++;
+                if (controlCount > 2) {
+                    openPaywall();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function toggleMist() {
+            const ctrl = document.getElementById("ctrl-mist");
+            if (!checkControlLimit()) {
+                ctrl.checked = !ctrl.checked;
+                return;
+            }
+            mistActive = ctrl.checked;
+            if (mistActive) {
+                // Auto turn off fan
+                document.getElementById("ctrl-fan").checked = false;
+                fanActive = false;
+                addLog("🟢 เปิดการทำงาน [ระบบพ่นละอองหมอก] -> กำลังฉีดพ่นละอองน้ำสัมพัทธ์");
+                showToast("ระบบพ่นหมอกทำงาน");
+            } else {
+                addLog("🔴 ปิดการทำงาน [ระบบพ่นละอองหมอก]");
+                showToast("ระบบพ่นหมอกหยุดทำงาน");
+            }
+        }
+
+        function toggleFan() {
+            const ctrl = document.getElementById("ctrl-fan");
+            if (!checkControlLimit()) {
+                ctrl.checked = !ctrl.checked;
+                return;
+            }
+            fanActive = ctrl.checked;
+            if (fanActive) {
+                // Auto turn off mist
+                document.getElementById("ctrl-mist").checked = false;
+                mistActive = false;
+                addLog("🟢 เปิดการทำงาน [พัดลมระบายอากาศ] -> ดูดไล่ความชื้นส่วนเกิน");
+                showToast("พัดลมระบายอากาศทำงาน");
+            } else {
+                addLog("🔴 ปิดการทำงาน [พัดลมระบายอากาศ]");
+                showToast("พัดลมระบายอากาศหยุดทำงาน");
+            }
+        }
+
+        function runHoist() {
+            if (!checkControlLimit()) return;
+
+            const hoistVal = document.getElementById("val-hoist");
+            hoistVal.innerText = "กำลังเคลื่อนย้าย...";
+            hoistVal.style.color = "var(--accent-gold)";
+            addLog("⚙️ คำสั่ง Overhead Hoist: กำลังยกและเลื่อนตะกร้าก้อนเห็ดผ่านรางเลื่อน...");
+            showToast(" Overhead Hoist กำลังเลื่อน...");
+
+            setTimeout(function() {
+                hoistVal.innerText = "สแตนด์บาย";
+                hoistVal.style.color = "";
+                addLog("✅ Overhead Hoist: ขนย้ายก้อนเห็ดไปยังแท่นตรวจจับความชื้นสำเร็จ (สแตนด์บาย)");
+                showToast(" Overhead Hoist ขนย้ายเสร็จสิ้น");
+            }, 3000);
+        }
+
+        function toggleControl(id, name) {
+            const checked = document.getElementById(id).checked;
+            if (!checkControlLimit()) {
+                document.getElementById(id).checked = !checked;
+                return;
+            }
+            const stateText = checked ? "🟢 เปิดการทำงาน" : "🔴 ปิดการทำงาน";
+            addLog(`สวิตช์สั่งการ [${name}] เปลี่ยนสถานะเป็น: ${stateText}`);
+            showToast(`สั่งการ ${name} -> ${checked ? 'เปิด' : 'ปิด'} สำเร็จ`);
+        }
+
+        function openPaywall() {
+            document.getElementById("paywall-modal").style.display = "flex";
+        }
+
+        function closePaywall() {
+            document.getElementById("paywall-modal").style.display = "none";
+        }
+
+        function triggerSlipUpload() {
+            document.getElementById("slip-file").click();
+        }
+
+        function handleSlipFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById("slip-upload-text").innerHTML = `<i class="fa-solid fa-file-image" style="color:var(--primary-glow)"></i><span style="color:var(--primary-glow)">เลือกสลิปสำเร็จ: ${file.name} (พร้อมยืนยัน)</span>`;
+            }
+        }
+
+        function confirmPayment() {
+            isPro = true;
+            closePaywall();
+            document.getElementById("tier-badge").style.display = "none";
+            document.getElementById("pro-badge").style.display = "flex";
+            document.getElementById("btn-header-upgrade").style.display = "none";
+            document.getElementById("chart-lock").style.display = "none";
+            
+            addLog("👑 ยืนยันสิทธิ์ควบคุมพรีเมียมระดับ PRO ตลอดชีพสำเร็จ!");
+            showToast("👑 อัปเกรดระบบควบคุม PRO ตลอดชีพสำเร็จแล้ว!");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "toast show";
+            setTimeout(function() {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+
+        function submitLead(event) {
+            event.preventDefault();
+            const email = document.getElementById("lead-email").value;
+            const name = document.getElementById("lead-name").value;
+
+            if (!email.toLowerCase().endsWith("@gmail.com")) {
+                showToast("❌ ระบบรองรับเฉพาะอีเมล Gmail (@gmail.com) เท่านั้นตามนโยบายกองสุข");
+                return;
+            }
+
+            showToast(`🟢 ยินดีต้อนรับคุณ ${name}! ลิงก์ดาวน์โหลดพิมพ์เขียวถูกส่งไปที่ ${email} เรียบร้อย`);
+            addLog(`ส่งออกพิมพ์เขียวโครงสร้าง 3D สำหรับ: ${name} (${email})`);
+            document.getElementById("lead-email").value = "";
+            document.getElementById("lead-name").value = "";
+        }
+    </script>
+</body>
+</html>
