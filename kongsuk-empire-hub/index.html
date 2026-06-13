@@ -934,42 +934,51 @@
 
     <!-- Premium Paywall Modal -->
     <div class="modal" id="paywall-modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 550px;">
             <button class="modal-close" onclick="closePaywall()"><i class="fa-solid fa-xmark"></i></button>
             <i class="fa-solid fa-crown paywall-icon"></i>
             <h2 class="paywall-title">สิทธิ์การควบคุมระดับสูง (PRO CONTROL)</h2>
             <p class="paywall-subtitle">ปลดล็อกระบบควบคุมออโตเมชัน EA และสร้างแผนการหารายได้อัตโนมัติ</p>
+            <div class="paywall-price" style="font-size: 1.6rem; text-align: center; margin-bottom: 12px;"><span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-muted);">฿2,500</span> ฿0 <span style="color: #00ccff; font-size: 1.1rem; font-weight: bold;">(ฟรี 6 เดือนแรก)</span></div>
             
-            <div class="pro-benefits-list">
+            <div class="pro-benefits-list" style="margin-bottom: 15px;">
                 <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> ปลดล็อกแผงเจเนอเรต License Key คีย์ลิขสิทธิ์ EA ไม่จำกัดครั้งต่อวัน</div>
                 <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> เรียกใช้งานสคริปต์คอมไพล์และทำ Strategy Tester คอนฟิกอัตโนมัติ</div>
                 <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> มอนิเตอร์การผลิตและอัปโหลดไฟล์วิดีโอจากคิว PM2 จริง</div>
                 <div class="pro-benefit-item"><i class="fa-solid fa-circle-check"></i> รับแผนผังและเชื่อมต่อ Webhook ของระบบหลังบ้าน n8n ฟรี</div>
             </div>
 
-            <div class="price-tag">
-                <span>1,990.-</span> 999 บาท เท่านั้น (สิทธิ์ครอบคลุมตลอดชีพ)
-            </div>
-
-            <div class="qr-section">
-                <p style="font-size:0.85rem; color:var(--text-muted);">สแกนจ่ายเงินจำลองเพื่อสมัครสิทธิ์ PRO</p>
-                <div class="qr-placeholder">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KongsukEmpireHub999" alt="QR Code Payment Simulation">
-                </div>
-                <p style="font-size:0.75rem; color:var(--accent-gold); font-weight: 600;">บัญชีบริษัท กองสุข โฮลดิ้ง จำกัด (จำลอง)</p>
-            </div>
-
-            <div class="upload-section" onclick="triggerSlipUpload()">
-                <input type="file" id="slip-file" onchange="handleSlipFile(event)">
-                <div class="upload-text" id="slip-upload-text">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <span>อัปโหลดรูปภาพสลิปโอนเงินจำลองที่นี่เพื่อขอยืนยันสิทธิ์ทันที</span>
+            <!-- แผงเลือกรับสิทธิ์ฟรี 6 เดือน -->
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 12px; margin-bottom: 15px;">
+                <h4 style="color: var(--accent-gold); font-size: 0.95rem; margin-bottom: 8px; text-align: center;">🎁 สมัครรับสิทธิ์ทดลองใช้งานฟรี 6 เดือน</h4>
+                <div id="trial-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                        <input type="email" id="trial-email" class="form-control" placeholder="อีเมล (เช่น yourname@gmail.com)" style="padding: 10px 12px; font-size: 0.8rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; width: 100%;" required>
+                        <input type="tel" id="trial-phone" class="form-control" placeholder="เบอร์โทรศัพท์" style="padding: 10px 12px; font-size: 0.8rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; width: 100%;" required>
+                    </div>
+                    <button onclick="activateFreeTrial()" class="btn-confirm-pay" style="padding: 10px; font-size: 0.9rem; background: linear-gradient(135deg, var(--accent-gold), #ffa500); color: #1a0f00; border: none; font-weight: bold; width: 100%; border-radius: 10px; cursor: pointer; transition: all 0.3s ease;">
+                        🔥 เปิดใช้งานสิทธิ์ฟรี 6 เดือนทันที
+                    </button>
                 </div>
             </div>
 
-            <button class="btn-confirm-pay" onclick="confirmPayment()">
-                ยืนยันการชำระเงินและเปิดสิทธิ์ PRO
-            </button>
+            <!-- แผงสนับสนุน Lifetime พร้อมเพย์ -->
+            <div class="qr-section" style="padding: 10px; margin-bottom: 12px; text-align: center; background: rgba(255, 255, 255, 0.02); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <p style="font-weight: bold; font-size: 0.85rem; color: #00ccff; margin-bottom: 8px;">💳 สนับสนุนระดับ PRO Lifetime (สิทธิ์ตลอดชีพ)</p>
+                <div class="qr-placeholder" style="width: 140px; height: 140px; background: #fff; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; margin: 0 auto 6px auto;">
+                    <img src="https://promptpay.io/0615499426/999.png" alt="PromptPay QR Code" style="width: 132px; height: 132px;">
+                </div>
+                <p style="font-weight: bold; font-size: 0.85rem; color: #fff; margin-top: 6px; margin-bottom: 0;">ชยพงศ์ รุ้แผน</p>
+                <p style="font-size: 0.75rem; color: var(--accent-gold); margin-bottom: 0;">บัญชีพร้อมเพย์: 061-549-9426 (999 บาท)</p>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 10px;">
+                <span id="slip-upload-loading" style="display:none; color: var(--accent-gold); font-size: 0.80rem; margin-bottom: 4px;">⏳ กำลังส่งข้อมูลสลิปและปลดล็อกระบบ...</span>
+                <input type="file" id="slip-file-input" style="display: none;" onchange="uploadRealSlip(this)">
+                <label for="slip-file-input" class="btn-confirm-pay" style="display: inline-block; padding: 10px 20px; font-size: 0.85rem; background: linear-gradient(135deg, #00d2ff, #0077ff); color: #ffffff; font-weight: bold; border-radius: 10px; cursor: pointer; width: 100%; border: none; text-align: center; box-sizing: border-box;">
+                    📸 อัปโหลดสลิปเงินโอน Lifetime
+                </label>
+            </div>
         </div>
     </div>
 
@@ -1067,27 +1076,93 @@
             document.getElementById("paywall-modal").style.display = "none";
         }
 
-        function triggerSlipUpload() {
-            document.getElementById("slip-file").click();
+        function uploadRealSlip(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            document.getElementById('slip-upload-loading').style.display = 'block';
+
+            // เตรียมข้อมูลส่ง Telegram
+            const formData = new FormData();
+            formData.append('chat_id', '7572179751');
+            formData.append('photo', file);
+            formData.append('caption', `🔔 <b>แจ้งโอนเงิน PRO 999 บาท (ควบคุมแผงหลังบ้าน)</b>\n📅 วันเวลา: ${new Date().toLocaleString('th-TH')}\n📱 แอป: Kongsuk Empire Hub\n👤 ผู้โอนชำระเงินเข้าบัญชี: ชยพงศ์ รุ้แผน\n\n💰 ยอดโอน: 999 บาท (พร้อมเพย์จริง)\n🚀 ปลดล็อกการสั่งงาน PRO เรียบร้อยแล้วครับ!`);
+            formData.append('parse_mode', 'HTML');
+
+            fetch('https://api.telegram.org/bot8295465995:AAFAKBaVf-Uv2Pf5IutHlPd27T5wfQq7Hvs/sendPhoto', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('slip-upload-loading').style.display = 'none';
+                if (data.ok) {
+                    unlockPro("PRO LIFETIME");
+                    showToast("👑 อัปเกรดสิทธิ์ควบคุม PRO สำเร็จ!");
+                } else {
+                    fallbackProUnlock();
+                }
+            })
+            .catch(err => {
+                document.getElementById('slip-upload-loading').style.display = 'none';
+                fallbackProUnlock();
+            });
         }
 
-        function handleSlipFile(event) {
-            const file = event.target.files[0];
-            if (file) {
-                document.getElementById("slip-upload-text").innerHTML = `<i class="fa-solid fa-file-image" style="color:var(--primary-glow)"></i><span style="color:var(--primary-glow)">เลือกสลิปสำเร็จ: ${file.name} (พร้อมยืนยัน)</span>`;
-            }
+        function fallbackProUnlock() {
+            unlockPro("PRO LIFETIME");
+            showToast("👑 อัปเกรดสิทธิ์ควบคุม PRO สำเร็จ! (โหมดออฟไลน์)");
         }
 
-        function confirmPayment() {
+        function unlockPro(badgeText) {
             isPro = true;
             closePaywall();
             document.getElementById("tier-badge").style.display = "none";
-            document.getElementById("pro-badge").style.display = "flex";
+            
+            const proBadge = document.getElementById("pro-badge");
+            proBadge.style.display = "flex";
+            proBadge.innerText = badgeText;
+            
             document.getElementById("btn-header-upgrade").style.display = "none";
             document.getElementById("ea-lock").style.display = "none";
+            addLog("sys-log", `👑 ยืนยันสิทธิ์บัญชาการพรีเมียมระดับ [${badgeText}] สำเร็จ! ปลดล็อกแผงบอตเทรด`);
+        }
+
+        function activateFreeTrial() {
+            const email = document.getElementById('trial-email').value;
+            const phone = document.getElementById('trial-phone').value;
+
+            if (!email || !phone) {
+                showToast("❌ กรุณากรอกข้อมูลอีเมลและเบอร์โทรศัพท์ให้ครบถ้วน");
+                return;
+            }
+
+            if (!email.toLowerCase().endsWith("@gmail.com")) {
+                showToast("❌ ระบบรองรับเฉพาะอีเมล Gmail (@gmail.com) เท่านั้น");
+                return;
+            }
             
-            addLog("sys-log", "👑 ยืนยันสิทธิ์บัญชาการ PRO ตลอดชีพเรียบร้อย ปลดล็อกแผงบอตเทรด!");
-            showToast("👑 อัปเกรดแผงบัญชาการ PRO สำเร็จ!");
+            // ส่งข้อมูลรับสิทธิ์เข้า Telegram
+            const message = `🎁 <b>สมัครรับสิทธิ์ใช้งานฟรี 6 เดือน (ควบคุมแผงหลังบ้าน)</b>\n📅 วันเวลา: ${new Date().toLocaleString('th-TH')}\n📱 แอป: Kongsuk Empire Hub\n📧 อีเมลลูกค้า: ${email}\n📞 เบอร์โทรศัพท์: ${phone}\n\n🚀 ระบบทำการอนุมัติสิทธิ์การใช้งานฟรี 6 เดือน ให้ลูกค้าเรียบร้อยแล้ว!`;
+            
+            fetch(`https://api.telegram.org/bot8295465995:AAFAKBaVf-Uv2Pf5IutHlPd27T5wfQq7Hvs/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: '7572179751',
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                unlockPro("FREE 6-MONTHS");
+                showToast("🎁 เปิดใช้งานสิทธิ์ทดลองฟรี 6 เดือนเรียบร้อยแล้ว!");
+            })
+            .catch(err => {
+                unlockPro("FREE 6-MONTHS");
+                showToast("เปิดใช้งานสิทธิ์ฟรี 6 เดือน (โหมดออฟไลน์)");
+            });
         }
 
         function showToast(message) {
