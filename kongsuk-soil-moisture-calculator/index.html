@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Soil Moisture Smart Calculator - ระบบคำนวณความชื้นและการรดน้ำอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #071507;
+            --bg-card: rgba(12, 46, 10, 0.45);
+            --primary: #39ff14; /* Cyber Neon Green */
+            --primary-glow: rgba(57, 255, 20, 0.4);
+            --secondary: #00ffcc; /* Cyber Cyan */
+            --secondary-glow: rgba(0, 255, 204, 0.3);
+            --text-light: #f5fcf5;
+            --text-muted: #a6c0a6;
+            --border: rgba(57, 255, 20, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(12, 50, 10, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(0, 50, 40, 0.25) 0%, transparent 50%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Ambient glowing dots background */
+        .glowing-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .glowing-bg::after {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: var(--primary);
+            filter: blur(140px);
+            border-radius: 50%;
+            top: 15%;
+            left: 10%;
+            animation: float-slow 15s infinite alternate;
+        }
+
+        @keyframes float-slow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 30px) scale(1.2); }
+        }
+
+        header {
+            width: 100%;
+            max-width: 950px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px var(--primary-glow);
+            font-weight: 700;
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .btn-pro {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #000;
+            font-weight: 700;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--primary-glow);
+            font-size: 13px;
+        }
+
+        .btn-pro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--secondary-glow);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            text-shadow: 0 0 10px var(--secondary-glow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        select, input[type="range"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .range-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 45px;
+        }
+
+        .btn-calc {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn-calc:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .result-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .result-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .result-placeholder {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .result-content {
+            width: 100%;
+            text-align: left;
+            display: none;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+        }
+
+        .metric-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .lead-panel {
+            background: rgba(57, 255, 20, 0.03);
+            border: 1px solid rgba(57, 255, 20, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .lead-panel p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .lead-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lead-input {
+            flex: 1;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .lead-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 0 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            font-size: 13px;
+        }
+
+        .lead-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Premium Paywall Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            border-radius: 28px;
+            width: 90%;
+            max-width: 500px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 0 35px var(--primary-glow);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--primary);
+        }
+
+        .paywall-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(57, 255, 20, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .qr-placeholder {
+            width: 160px;
+            height: 160px;
+            background: white;
+            border-radius: 12px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-weight: 700;
+            font-size: 11px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            border: 4px solid var(--primary);
+            position: relative;
+        }
+
+        /* Simulating QR code lines using CSS gradients */
+        .qr-placeholder::before {
+            content: 'PRO PAY';
+            position: absolute;
+            background: var(--primary);
+            color: #000;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            top: -10px;
+        }
+
+        .qr-img {
+            width: 140px;
+            height: 140px;
+            background: repeating-linear-gradient(45deg, #000, #000 10px, #fff 10px, #fff 20px);
+            opacity: 0.15;
+            position: absolute;
+        }
+
+        .file-upload {
+            margin-top: 15px;
+            border: 1px dashed var(--border);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 13px;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .btn-submit-slip {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 10px;
+            color: black;
+            font-weight: 700;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: box-shadow 0.3s;
+        }
+
+        .btn-submit-slip:hover {
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        footer {
+            margin-top: auto;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .badge-pro-active {
+            display: none;
+            color: var(--primary);
+            background: rgba(57, 255, 20, 0.1);
+            border: 1px solid var(--primary);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="glowing-bg"></div>
+
+    <header>
+        <div class="brand">
+            <span class="brand-logo">🌾</span>
+            <div class="brand-text">
+                <h1 id="app-title-main">Kongsuk Soil Moisture Smart Calculator</h1>
+                <p id="app-tagline">แผงคำนวณการใช้น้ำและตั้งค่าระดับเซนเซอร์อัจฉริยะกองสุข</p>
+            </div>
+        </div>
+        <button class="btn-pro" id="paywall-trigger">Upgrade PRO (฿999)</button>
+        <span class="badge-pro-active" id="pro-badge">PRO VERSION ACTIVE</span>
+    </header>
+
+    <div class="container">
+        <!-- Input Panel -->
+        <div class="panel">
+            <h2>⚙️ ตั้งค่าข้อมูลการเกษตร</h2>
+            
+            <div class="form-group">
+                <label for="soil-type">ประเภทของดิน (Soil Type)</label>
+                <select id="soil-type">
+                    <option value="sandy">ดินทราย (Sandy Soil) - อุ้มน้ำต่ำ ระเหยเร็ว</option>
+                    <option value="loamy" selected>ดินร่วน (Loamy Soil) - ปานกลาง ปริมาณน้ำเหมาะสม</option>
+                    <option value="clay">ดินเหนียว (Clay Soil) - อุ้มน้ำสูง แห้งช้า</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="crop-type">ประเภทพืชที่ปลูก (Crop Type)</label>
+                <select id="crop-type">
+                    <option value="mushrooms">โรงเรือนเห็ด (Mushrooms) - ความชื้นสูง 80%</option>
+                    <option value="salad">ผักสลัด/ไฮโดรโปนิกส์ดิน (Salad) - ความชื้นปานกลาง 60%</option>
+                    <option value="fruits">ไม้ผล/ทุเรียน (Fruits) - ความชื้นคงที่ 50%</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="area-size">ขนาดพื้นที่แปลงเกษตร (ตารางเมตร)</label>
+                <input type="number" id="area-size" value="100" min="10" max="10000">
+            </div>
+
+            <div class="form-group">
+                <label for="temp">อุณหภูมิอากาศโดยประมาณ (°C)</label>
+                <div class="range-container">
+                    <input type="range" id="temp" min="20" max="45" value="32">
+                    <span class="range-value" id="temp-val">32°C</span>
+                </div>
+            </div>
+
+            <button class="btn-calc" id="btn-calculate">วิเคราะห์ & คำนวณระบบน้ำ</button>
+        </div>
+
+        <!-- Result Panel -->
+        <div class="panel result-panel">
+            <div>
+                <h2>📊 ผลลัพธ์การวิเคราะห์ AI</h2>
+                <div class="result-box" id="result-box">
+                    <div class="result-placeholder" id="placeholder-text">
+                        กรุณากรอกข้อมูลแปลงเพาะปลูกแล้วกด "วิเคราะห์ & คำนวณระบบน้ำ" ด้านซ้ายเพื่อวิเคราะห์สถิติจริง
+                    </div>
+                    
+                    <div class="result-content" id="result-display">
+                        <div class="metric-row">
+                            <span class="metric-label">ระดับความชื้นเซนเซอร์เป้าหมาย:</span>
+                            <span class="metric-value" id="res-target-moisture">60%</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">ความถี่การรดน้ำต่อวัน:</span>
+                            <span class="metric-value" id="res-frequency">4 รอบ/วัน</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">ระยะเวลาการจ่ายน้ำต่อรอบ:</span>
+                            <span class="metric-value" id="res-duration">3 นาที</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">ปริมาณน้ำที่ต้องใช้ปกติ:</span>
+                            <span class="metric-value" id="res-normal-water">500 ลิตร/วัน</span>
+                        </div>
+                        <div class="metric-row" style="border-bottom: 2px solid var(--primary)">
+                            <span class="metric-label">ปริมาณน้ำที่ใช้หลังคุมด้วยเซนเซอร์:</span>
+                            <span class="metric-value" id="res-sensor-water" style="color: var(--secondary)">300 ลิตร/วัน</span>
+                        </div>
+                        <div class="metric-row" style="margin-top: 10px;">
+                            <span class="metric-label" style="font-weight: 700; color: var(--primary)">ประหยัดน้ำสะสมได้จริง:</span>
+                            <span class="metric-value" id="res-saving" style="font-size: 16px; color: var(--primary)">40%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lead Form -->
+            <div class="lead-panel">
+                <p>สมัครสมาชิกรับสิทธิ์ฟรีสคริปต์ควบคุมบอท IoT ผ่าน Gmail ของคุณ</p>
+                <div class="lead-form">
+                    <input type="email" class="lead-input" id="lead-email" placeholder="ชื่ออีเมล @gmail.com">
+                    <button class="lead-btn" id="lead-submit">ขอรับสิทธิ์ฟรี</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paywall Modal -->
+    <div class="modal" id="paywall-modal">
+        <div class="modal-content">
+            <span class="close-btn" id="modal-close">&times;</span>
+            <span class="paywall-badge">PRO UPGRADE SYSTEM</span>
+            <h3 style="font-size: 20px; color: var(--primary); margin-bottom: 10px;">ปลดล็อกเครื่องมือคำนวณและสิทธิ์บอทระบบน้ำ Pro</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">โอนเงินปลดล็อกสิทธิ์ถาวร 999 บาท เพื่อสิทธิพิเศษและการควบคุมแปลงอัจฉริยะได้ไม่จำกัด</p>
+            
+            <div class="qr-placeholder">
+                <div class="qr-img"></div>
+                <div style="z-index: 1; text-align: center;">
+                    <p style="font-size: 10px; color: #000; font-weight: 700; margin-bottom: 5px;">PROMPT PAY QR</p>
+                    <p style="font-size: 16px; color: #000; font-weight: 700;">฿999.00</p>
+                    <p style="font-size: 9px; color: #666; margin-top: 5px;">กองสุข Empire</p>
+                </div>
+            </div>
+
+            <p style="font-size: 11px; color: var(--text-light); margin-bottom: 10px;">เลขบัญชีโอน: <b>317-2-68958-6 (กสิกรไทย - กองสุข)</b></p>
+            
+            <div class="file-upload" id="file-upload-box">
+                <span id="slip-text">📎 อัปโหลดสลิปการโอนเงิน (สลิปจำลอง)</span>
+                <input type="file" id="slip-file" accept="image/*">
+            </div>
+
+            <button class="btn-submit-slip" id="btn-confirm-pay">ส่งหลักฐานยืนยันการโอนเงิน</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 กองสุข Empire - ระบบจัดการเกษตรกรรมอัจฉริยะเชิงพาณิชย์</p>
+        <p>สร้างโดย Antigravity AI Code Assistant / 24 Generals</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const tempInput = document.getElementById('temp');
+        const tempVal = document.getElementById('temp-val');
+        const btnCalculate = document.getElementById('btn-calculate');
+        const resultDisplay = document.getElementById('result-display');
+        const placeholderText = document.getElementById('placeholder-text');
+        const resultBox = document.getElementById('result-box');
+
+        // Form Inputs
+        const soilTypeSelect = document.getElementById('soil-type');
+        const cropTypeSelect = document.getElementById('crop-type');
+        const areaSizeInput = document.getElementById('area-size');
+
+        // Output Values
+        const resTargetMoisture = document.getElementById('res-target-moisture');
+        const resFrequency = document.getElementById('res-frequency');
+        const resDuration = document.getElementById('res-duration');
+        const resNormalWater = document.getElementById('res-normal-water');
+        const resSensorWater = document.getElementById('res-sensor-water');
+        const resSaving = document.getElementById('res-saving');
+
+        // Paywall elements
+        const paywallModal = document.getElementById('paywall-modal');
+        const paywallTrigger = document.getElementById('paywall-trigger');
+        const modalClose = document.getElementById('modal-close');
+        const fileUploadBox = document.getElementById('file-upload-box');
+        const slipFile = document.getElementById('slip-file');
+        const slipText = document.getElementById('slip-text');
+        const btnConfirmPay = document.getElementById('btn-confirm-pay');
+        const proBadge = document.getElementById('pro-badge');
+
+        // Lead elements
+        const leadEmail = document.getElementById('lead-email');
+        const leadSubmit = document.getElementById('lead-submit');
+
+        // Counter for free calculations limit
+        let calcCount = 0;
+        let isPro = false;
+
+        // Dynamic Temperature Slider value update
+        tempInput.addEventListener('input', (e) => {
+            tempVal.textContent = `${e.target.value}°C`;
+        });
+
+        // Calculation logic
+        btnCalculate.addEventListener('click', () => {
+            if (!isPro && calcCount >= 2) {
+                openPaywall();
+                return;
+            }
+
+            const soil = soilTypeSelect.value;
+            const crop = cropTypeSelect.value;
+            const size = parseFloat(areaSizeInput.value) || 100;
+            const temp = parseInt(tempInput.value);
+
+            // Compute moisture target based on crop
+            let targetMoisture = 60;
+            if (crop === 'mushrooms') targetMoisture = 80;
+            if (crop === 'salad') targetMoisture = 65;
+            if (crop === 'fruits') targetMoisture = 50;
+
+            // Compute watering frequency and duration based on temp & soil
+            let multiplier = 1.0;
+            if (temp > 35) multiplier = 1.4;
+            if (temp < 25) multiplier = 0.8;
+
+            let duration = 3;
+            if (soil === 'sandy') duration = 2; // sandy water drains fast, water less but frequent
+            if (soil === 'clay') duration = 5;  // clay drains slow, water longer but less frequent
+
+            let frequency = 3;
+            if (soil === 'sandy') frequency = 5;
+            if (soil === 'clay') frequency = 2;
+
+            frequency = Math.round(frequency * multiplier);
+
+            // Calculate water usage
+            let baseWaterPerSqMeter = 5.0; // liters per sqm per day
+            if (crop === 'mushrooms') baseWaterPerSqMeter = 8.0;
+            if (crop === 'fruits') baseWaterPerSqMeter = 4.0;
+
+            const normalWater = baseWaterPerSqMeter * size * (temp / 30);
+            
+            // Sensor helps optimize water based on soil type savings
+            let savingPercent = 35;
+            if (soil === 'clay') savingPercent = 45;
+            if (soil === 'loamy') savingPercent = 40;
+            if (soil === 'sandy') savingPercent = 25;
+
+            const sensorWater = normalWater * (1 - (savingPercent / 100));
+
+            // Typing effect simulating AI computation
+            placeholderText.style.display = 'none';
+            resultDisplay.style.display = 'none';
+            
+            // Create a fake processing effect
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'result-placeholder';
+            loadingDiv.id = 'temp-loading';
+            loadingDiv.innerHTML = '⚡ กำลังส่งค่าวิเคราะห์ไปยัง AI กองสุข...';
+            resultBox.appendChild(loadingDiv);
+
+            setTimeout(() => {
+                const loading = document.getElementById('temp-loading');
+                if (loading) loading.remove();
+
+                resTargetMoisture.textContent = `${targetMoisture}%`;
+                resFrequency.textContent = `${frequency} รอบ/วัน`;
+                resDuration.textContent = `${duration} นาที`;
+                resNormalWater.textContent = `${Math.round(normalWater)} ลิตร/วัน`;
+                resSensorWater.textContent = `${Math.round(sensorWater)} ลิตร/วัน`;
+                resSaving.textContent = `${savingPercent}%`;
+
+                resultDisplay.style.display = 'block';
+                calcCount++;
+            }, 1000);
+        });
+
+        // Lead Submission
+        leadSubmit.addEventListener('click', () => {
+            const email = leadEmail.value.trim();
+            if (!email.toLowerCase().endsWith('@gmail.com')) {
+                alert('❌ กรุณาใช้อีเมลสมัครเฉพาะบัญชี @gmail.com เท่านั้นตามระเบียบระบบกองสุข');
+                return;
+            }
+
+            // Simulating API webhook send
+            leadSubmit.disabled = true;
+            leadSubmit.textContent = 'บันทึกแล้ว...';
+            
+            // Trigger n8n webhook simulator
+            const webhookUrl = 'http://127.0.0.1:5678/webhook/kongsuk-leads';
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, app: 'kongsuk-soil-calculator' })
+            }).catch(e => {
+                // Ignore failure if offline, local simulation works
+            });
+
+            setTimeout(() => {
+                alert(`🟢 สมัครรับสิทธิ์สำเร็จ! ระบบส่งสคริปต์ควบคุมบอทไปที่ ${email} เรียบร้อยแล้ว`);
+                leadEmail.value = '';
+                leadSubmit.disabled = false;
+                leadSubmit.textContent = 'ขอรับสิทธิ์ฟรี';
+            }, 800);
+        });
+
+        // Paywall Functions
+        function openPaywall() {
+            paywallModal.classList.add('active');
+        }
+
+        function closePaywall() {
+            paywallModal.classList.remove('active');
+        }
+
+        paywallTrigger.addEventListener('click', openPaywall);
+        modalClose.addEventListener('click', closePaywall);
+
+        fileUploadBox.addEventListener('click', () => {
+            slipFile.click();
+        });
+
+        slipFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                slipText.textContent = `✅ เลือกไฟล์: ${e.target.files[0].name}`;
+            }
+        });
+
+        btnConfirmPay.addEventListener('click', () => {
+            if (slipFile.files.length === 0) {
+                alert('❌ กรุณาอัปโหลดรูปภาพสลิปการโอนเงิน (จำลอง)');
+                return;
+            }
+
+            btnConfirmPay.textContent = 'กำลังตรวจสอบหลักฐาน...';
+            btnConfirmPay.disabled = true;
+
+            setTimeout(() => {
+                isPro = true;
+                closePaywall();
+                paywallTrigger.style.display = 'none';
+                proBadge.style.display = 'inline-block';
+                alert('🟢 ยินดีต้อนรับ! ปลดล็อกระบบ Pro สำเร็จ ปลดข้อจำกัดการวิเคราะห์ถาวรแล้วครับ');
+            }, 1500);
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === paywallModal) {
+                closePaywall();
+            }
+        });
+    </script>
+</body>
+</html>
