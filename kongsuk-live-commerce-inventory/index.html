@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk AI VTuber Live Commerce & Inventory Simulator - ระบบจำลองการขายอัจฉริยะ</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #09011a 0%, #0c0822 50%, #02010d 100%);
+            --glass-bg: rgba(18, 12, 43, 0.5);
+            --glass-border: rgba(186, 104, 200, 0.2);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            --neon-purple: #e040fb;
+            --neon-cyan: #00e5ff;
+            --neon-pink: #ff4081;
+            --neon-green: #00e676;
+            --neon-amber: #ffea00;
+            --text-primary: #ffffff;
+            --text-secondary: #b0bec5;
+            --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Orbs */
+        .glow-orb {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(160px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .orb-1 { top: 10%; right: 15%; background: var(--neon-purple); }
+        .orb-2 { bottom: 10%; left: 10%; background: var(--neon-cyan); }
+
+        header {
+            background: rgba(12, 6, 28, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-logo {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(224, 64, 251, 0.4);
+        }
+
+        .brand-logo i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .brand-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffffff, var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text p {
+            font-size: 0.8rem;
+            color: var(--neon-cyan);
+            letter-spacing: 1px;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2rem;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panels styling */
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--panel-shadow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, var(--glass-highlight) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel-title i {
+            color: var(--neon-purple);
+        }
+
+        /* Left Panel - Simulator & Interface */
+        .avatar-screen {
+            background: #000000;
+            border-radius: 15px;
+            height: 380px;
+            position: relative;
+            overflow: hidden;
+            border: 1.5px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Simulated VTuber Canvas Avatar */
+        .vtuber-avatar {
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(224, 64, 251, 0.3) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: idleFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes idleFloat {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-10px) scale(1.02); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+
+        .vtuber-face {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #1c0e35 0%, #080315 100%);
+            border: 3px solid var(--neon-purple);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 30px rgba(224, 64, 251, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .eyes {
+            display: flex;
+            gap: 30px;
+        }
+
+        .eye {
+            width: 18px;
+            height: 18px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            animation: blinkEye 5s infinite;
+            position: relative;
+        }
+
+        @keyframes blinkEye {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        .mouth {
+            width: 24px;
+            height: 10px;
+            background: var(--neon-pink);
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 0 10px var(--neon-pink);
+            transition: all 0.1s ease;
+        }
+
+        /* Class for speech lip-sync */
+        .speaking .mouth {
+            animation: speakMouth 0.25s infinite alternate;
+        }
+
+        @keyframes speakMouth {
+            0% { height: 4px; border-radius: 50%; width: 16px; }
+            100% { height: 28px; border-radius: 0 0 14px 14px; width: 28px; }
+        }
+
+        /* Speaking Subtitle overlay */
+        .subtitle-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 5%;
+            right: 5%;
+            background: rgba(0, 0, 0, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.95rem;
+            color: #ffffff;
+            text-align: center;
+            backdrop-filter: blur(6px);
+            z-index: 10;
+        }
+
+        .speech-bubble {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: var(--neon-purple);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px 15px 15px 0px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(224, 64, 251, 0.4);
+        }
+
+        /* Stock Monitor Display */
+        .stock-control-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .stock-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stock-card.low-stock {
+            border-color: var(--neon-pink);
+            background: rgba(255, 23, 68, 0.05);
+            box-shadow: 0 0 15px rgba(255, 23, 68, 0.15);
+        }
+
+        .stock-card.out-of-stock {
+            border-color: #555;
+            background: rgba(255, 255, 255, 0.01);
+            opacity: 0.6;
+        }
+
+        .stock-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .stock-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .stock-card.low-stock .stock-val { color: var(--neon-pink); }
+
+        .btn-buy-demo {
+            background: linear-gradient(135deg, var(--neon-purple) 0%, var(--neon-pink) 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-buy-demo:hover {
+            box-shadow: 0 0 12px var(--neon-purple);
+            transform: translateY(-2px);
+        }
+
+        /* Right Panel - Chat and Automation */
+        .chat-section {
+            height: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-msg {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-user {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--neon-cyan);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-text {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px 12px;
+            border-radius: 0 12px 12px 12px;
+            font-size: 0.9rem;
+            max-width: 85%;
+            color: #ffffff;
+            border-left: 2px solid var(--neon-purple);
+        }
+
+        .chat-text.cf-keyword {
+            border-left-color: var(--neon-green);
+            background: rgba(0, 230, 118, 0.05);
+        }
+
+        .input-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-bar input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .input-bar input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+        }
+
+        .btn-send {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-send:hover {
+            background: var(--neon-purple);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 12px var(--neon-purple);
+        }
+
+        /* Lead Sync & paywall mockup */
+        .automation-log {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            height: 180px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--neon-cyan);
+        }
+
+        .log-line {
+            margin-bottom: 6px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-time { color: var(--text-secondary); }
+        .log-success { color: var(--neon-green); }
+        .log-alert { color: var(--neon-pink); }
+
+        /* Paywall Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #100624 0%, #1a0f3d 100%);
+            border: 1.5px solid var(--neon-purple);
+            border-radius: 25px;
+            width: 90%;
+            max-width: 460px;
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 0 40px rgba(224, 64, 251, 0.4);
+            text-align: center;
+            transform: scale(0.8);
+            transition: all 0.4s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover { color: white; }
+
+        .modal-badge {
+            background: var(--neon-pink);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(255, 64, 129, 0.4);
+        }
+
+        .price-tag {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 10px 0;
+        }
+
+        .price-tag span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .qr-mockup {
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 15px;
+            margin: 1.5rem auto;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+
+        .qr-mockup img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .paywall-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-confirm-pay {
+            background: linear-gradient(135deg, var(--neon-purple) 0%, var(--neon-cyan) 100%);
+            border: none;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm-pay:hover {
+            box-shadow: 0 0 25px var(--neon-purple);
+            transform: translateY(-2px);
+        }
+
+        /* Top banner info */
+        .info-strip {
+            background: rgba(224, 64, 251, 0.1);
+            border-bottom: 1.5px dashed var(--glass-border);
+            padding: 0.6rem 5%;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+        }
+
+        .badge-live {
+            background: var(--neon-pink);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            animation: pulseLive 1.5s infinite;
+        }
+
+        @keyframes pulseLive {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Info Bar -->
+    <div class="info-strip">
+        <div><span class="badge-live">LIVE</span> <i class="fa-solid fa-tower-broadcast"></i> ระบบจำลองสตรีมสด VTuber ปล่อยขายของคลังอัจฉริยะ (SaaS Simulation)</div>
+        <div>สถานะพอร์ต: <span style="color: var(--neon-green); font-weight: 600;">9090 Online</span> | บัญชี: user@gmail.com</div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-logo">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div class="brand-text">
+                <h1>Kongsuk AI VTuber Live Commerce & Stock Master</h1>
+                <p>AUTOMATED COMMERCE & REAL-TIME STOCK INVENTORY</p>
+            </div>
+        </div>
+        <div>
+            <button class="btn-buy-demo" style="margin: 0; padding: 0.6rem 1.5rem;" onclick="openModal()">
+                <i class="fa-solid fa-gem"></i> ปลดล็อก Pro 999 บาท
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        
+        <!-- Left Panel: Avatar & Stock Control -->
+        <div class="glass-panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-desktop"></i>
+                <span>จอ VTuber Simulator และแผงควบคุมสต็อกจริง</span>
+            </div>
+
+            <!-- Simulation Screen -->
+            <div class="avatar-screen" id="avatarScreen">
+                <div class="speech-bubble" id="speechLabel">โหมด: สต็อกปกติ</div>
+                <div class="vtuber-avatar" id="avatarWrap">
+                    <div class="vtuber-face">
+                        <div class="eyes">
+                            <div class="eye"></div>
+                            <div class="eye"></div>
+                        </div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+                <!-- Interactive subtitle -->
+                <div class="subtitle-overlay" id="avatarSubtitle">
+                    สวัสดีเพื่อนๆ ทุกคนค่า! วันนี้ปุยนุ่นมีข้าวหอมมะลิออร์แกนิกเกรดพรีเมียมจากทุ่งกองสุขมาแนะนำค่ะ สดใหม่และนุ่มหอมมากๆ เลยนะคะ!
+                </div>
+            </div>
+
+            <!-- Stock Control Board -->
+            <div class="stock-control-board">
+                <div class="stock-card" id="stockCard">
+                    <div class="stock-label">สต็อกข้าวหอมมะลิ (ถุง)</div>
+                    <div class="stock-val" id="stockCount">25</div>
+                    <button class="btn-buy-demo" onclick="triggerPurchase()">จำลองซื้อ (-1)</button>
+                </div>
+                <div class="stock-card" id="keywordCard">
+                    <div class="stock-label">คีย์เวิร์ดปิดการขาย</div>
+                    <div class="stock-val" style="font-size: 1.4rem; color: var(--neon-cyan); margin-top: 5px;">"CF999"</div>
+                    <button class="btn-buy-demo" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);" onclick="simulateKeywordChat()">จำลองคอมเมนต์ CF</button>
+                </div>
+                <div class="stock-card">
+                    <div class="stock-label">โหมดการพูดของ AI</div>
+                    <div class="stock-val" id="speechModeText" style="font-size: 1.2rem; color: var(--neon-green); margin-top: 8px;">ต้อนรับ & แนะนำ</div>
+                    <button class="btn-buy-demo" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);" onclick="restock()">เติมสต็อก (+25)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Automation Logs & Chat -->
+        <div class="glass-panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-microchip"></i>
+                <span>ระบบ Automation & บันทึกข้อความแชทสด</span>
+            </div>
+
+            <!-- Simulated live chat -->
+            <div class="chat-section">
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">ไลฟ์แชทสดจำลอง (Live Chat Stream):</div>
+                <div class="chat-box" id="chatBox">
+                    <div class="chat-msg">
+                        <div class="chat-user"><i class="fa-solid fa-user"></i> สมชาย รักเรียน</div>
+                        <div class="chat-text">ข้าวหอมจากจังหวัดอะไรครับ?</div>
+                    </div>
+                    <div class="chat-msg">
+                        <div class="chat-user"><i class="fa-solid fa-user"></i> แดง พารวย</div>
+                        <div class="chat-text">ดูน่ากินจังเลยค่า</div>
+                    </div>
+                </div>
+                <!-- Input user chat -->
+                <div class="input-bar">
+                    <input type="text" id="userInput" placeholder="พิมพ์คุยกับบอท หรือพิมพ์ 'CF999' เพื่อจำลองระบบปิดการขาย..." onkeydown="if(event.key === 'Enter') sendUserMessage()">
+                    <button class="btn-send" onclick="sendUserMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <!-- Automation Log Console -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                    <span>แผงควบคุมระบบนำส่งข้อความหลังบ้าน (Automation Logging):</span>
+                    <span style="color: var(--neon-green);"><i class="fa-solid fa-shield-halved"></i> Active</span>
+                </div>
+                <div class="automation-log" id="logConsole">
+                    <div class="log-line"><span class="log-time">[16:13:00]</span> <span class="log-success">เชื่อมต่อฐานข้อมูลหลักสต็อกสินค้าสำเร็จ (MySQL Online)</span></div>
+                    <div class="log-line"><span class="log-time">[16:13:02]</span> <span>สแตนด์บายดักจับแชทสดบน TikTok Live และ YouTube Live...</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Paywall Modal Mockup -->
+    <div class="modal" id="paywallModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <span class="modal-badge">PRO LIFETIME ACCESS</span>
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;">ปลดล็อกระบบปิดการขายอัตโนมัติ</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">เชื่อมสต็อกเรียลไทม์ และระบบปิดยอดทักอินบอกซ์อัตโนมัติแบบไร้ขีดจำกัด</p>
+            
+            <div class="price-tag">฿999 <span>/ ตลอดชีพ</span></div>
+            
+            <!-- simulated QR -->
+            <div class="qr-mockup">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://kongsuk-soil-moisture-calculator.pages.dev" alt="Simulated QR Code">
+            </div>
+            
+            <input type="email" class="paywall-input" id="leadEmail" placeholder="กรอก Gmail ของคุณเพื่อรับสิทธิ์อัปเกรด">
+            <button class="btn-confirm-pay" onclick="confirmPayment()">ยืนยันสมัครใช้สิทธิ์ Pro 999 บาท</button>
+        </div>
+    </div>
+
+    <script>
+        let stock = 25;
+        const chatNames = ["สมพงษ์ เกษตรกร", "น้ำใจ ดีงาม", "ดาริกา ฟ้าใส", "วิชัย ค้าขาย", "กิติพงษ์ ลุยงาน"];
+        const normalSpeeches = [
+            "ยินดีต้อนรับเพื่อนๆ ทุกคนที่แวะเข้ามาในไลฟ์สดกองสุขนะคะ วันนี้มีข้าวหอมมะลิเด็ดๆ มาฝากค่า!",
+            "ข้าวหอมมะลิของเราใช้เกษตรอินทรีย์ ปราศจากสารเคมี ปลอดภัยต่อสุขภาพ ทานอุ่นๆ ฟินมากเลยค่ะ",
+            "ใครกำลังมองหาข้าวสุขภาพระดับพรีเมียม ข้าวจากทุ่งกองสุข Empire ตอบโจทย์ที่สุดแล้วค่ะ"
+        ];
+        const lowStockSpeeches = [
+            "📢 ทุกคนคะ! ตอนนี้สต็อกข้าวหอมมะลิในคลังใกล้จะหมดแล้วนะคะ! เหลือถุงสุดท้ายแล้วค่ะ!",
+            "🔥 สต็อกด่วนวิกฤต! ข้าวหอมมะลิเหลือต่ำกว่า 5 ถุงแล้วค่ะ ใครอยากได้พิมพ์ CF999 ด่วนที่สุดเลยค่า!",
+            "ช้าหมดอดทานนะคะรอบนี้ ข้าวล็อตนี้หอมนุ่มมาก และสต็อกตอนนี้เหลือไม่ถึง 3 ถุงแล้วค่ะ!"
+        ];
+        const outOfStockSpeeches = [
+            "❌ ขออภัยด้วยจริงๆ นะคะทุกคน ข้าวหอมมะลิล็อตนี้ขายหมดเกลี้ยงสต็อกเรียบร้อยแล้วค่ะ!",
+            "หมดแล้วค่า! ล็อตถัดไปต้องรอผลผลิตรอบใหม่นะคะ ขอบพระคุณทุกคนที่สนับสนุนมากๆ เลยค่ะ",
+            "ระบบปิดรับยอดออเดอร์ชั่วคราวเนื่องจากสินค้าหมดสต็อกค่ะ รอติดตามล็อตถัดไปได้เลยนะคะ"
+        ];
+
+        function addLog(text, type = "") {
+            const consoleEl = document.getElementById("logConsole");
+            const date = new Date();
+            const timeStr = date.toTimeString().split(' ')[0];
+            
+            let typeClass = "";
+            if (type === "success") typeClass = "log-success";
+            else if (type === "alert") typeClass = "log-alert";
+
+            const logLine = document.createElement("div");
+            logLine.className = "log-line";
+            logLine.innerHTML = `<span class="log-time">[${timeStr}]</span> <span class="${typeClass}">${text}</span>`;
+            consoleEl.appendChild(logLine);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function triggerSpeechAnimation() {
+            const avatarWrap = document.getElementById("avatarWrap");
+            avatarWrap.classList.add("speaking");
+            
+            // Randomly stop speaking animation after a short delay
+            setTimeout(() => {
+                avatarWrap.classList.remove("speaking");
+            }, 5000);
+        }
+
+        function updateVTuberSpeech() {
+            const speechModeText = document.getElementById("speechModeText");
+            const avatarSubtitle = document.getElementById("avatarSubtitle");
+            const speechLabel = document.getElementById("speechLabel");
+            const stockCard = document.getElementById("stockCard");
+
+            triggerSpeechAnimation();
+
+            if (stock > 5) {
+                speechModeText.innerText = "แนะนำสินค้าทั่วไป";
+                speechModeText.style.color = "var(--neon-green)";
+                speechLabel.innerText = "โหมด: สต็อกปกติ";
+                speechLabel.style.background = "var(--neon-purple)";
+                stockCard.classList.remove("low-stock");
+                stockCard.classList.remove("out-of-stock");
+                
+                const rand = normalSpeeches[Math.floor(Math.random() * normalSpeeches.length)];
+                avatarSubtitle.innerText = rand;
+            } else if (stock > 0 && stock <= 5) {
+                speechModeText.innerText = "🚨 เร่งปิดการขาย (Scarcity)";
+                speechModeText.style.color = "var(--neon-pink)";
+                speechLabel.innerText = "โหมด: เร่งขายด่วน!";
+                speechLabel.style.background = "var(--neon-pink)";
+                stockCard.classList.add("low-stock");
+                stockCard.classList.remove("out-of-stock");
+
+                const rand = lowStockSpeeches[Math.floor(Math.random() * lowStockSpeeches.length)];
+                avatarSubtitle.innerText = rand;
+                addLog(`[AI BRAIN] เปลี่ยนบทพูดเป็นโหมดเร่งขาย (สต็อกเหลือ: ${stock})`, "alert");
+            } else {
+                speechModeText.innerText = "แจ้งปิดรับออเดอร์";
+                speechModeText.style.color = "var(--text-secondary)";
+                speechLabel.innerText = "โหมด: สินค้าหมด";
+                speechLabel.style.background = "#555";
+                stockCard.classList.add("out-of-stock");
+
+                const rand = outOfStockSpeeches[Math.floor(Math.random() * outOfStockSpeeches.length)];
+                avatarSubtitle.innerText = rand;
+                addLog(`[AI BRAIN] สต็อกสินค้าหมด - แจ้งปฏิเสธการ CF`, "alert");
+            }
+        }
+
+        function triggerPurchase() {
+            if (stock > 0) {
+                stock--;
+                document.getElementById("stockCount").innerText = stock;
+                addLog(`[สต็อกจำลอง] มีการจำลองสั่งซื้อสินค้าเรียบร้อย สต็อกเหลือ: ${stock}`, "success");
+                updateVTuberSpeech();
+            } else {
+                addLog(`[คลังสินค้า] ไม่สามารถทำรายการซื้อได้เนื่องจากสินค้าหมดสต็อก`, "alert");
+            }
+        }
+
+        function restock() {
+            stock = 25;
+            document.getElementById("stockCount").innerText = stock;
+            addLog("[คลังสินค้า] เติมสต็อกสินค้าสำเร็จ (+25 ถุง)", "success");
+            updateVTuberSpeech();
+        }
+
+        function appendChatMessage(user, text, isCF = false) {
+            const chatBox = document.getElementById("chatBox");
+            const msgEl = document.createElement("div");
+            msgEl.className = "chat-msg";
+            
+            let cfClass = isCF ? "cf-keyword" : "";
+            msgEl.innerHTML = `
+                <div class="chat-user"><i class="fa-solid fa-user"></i> ${user}</div>
+                <div class="chat-text ${cfClass}">${text}</div>
+            `;
+            chatBox.appendChild(msgEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendUserMessage() {
+            const inputEl = document.getElementById("userInput");
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            appendChatMessage("คุณ (จำลองผู้ซื้อ)", text, text.toUpperCase().includes("CF999"));
+            inputEl.value = "";
+
+            if (text.toUpperCase().includes("CF999")) {
+                handleCFKeyword("คุณ (จำลองผู้ซื้อ)");
+            }
+        }
+
+        function simulateKeywordChat() {
+            const randUser = chatNames[Math.floor(Math.random() * chatNames.length)];
+            appendChatMessage(randUser, "CF999 อยากได้ข้าวหอมมะลิครับ!", true);
+            handleCFKeyword(randUser);
+        }
+
+        function handleCFKeyword(user) {
+            addLog(`[ดักจับแชทสด] ตรวจพบคีย์เวิร์ด CF999 จากผู้ใช้: ${user}`, "success");
+            
+            if (stock > 0) {
+                // Trigger purchase
+                stock--;
+                document.getElementById("stockCount").innerText = stock;
+                addLog(`[สต็อก] สต็อกถูกหักออกเรียบร้อย คงเหลือ: ${stock}`);
+                
+                // Simulate sending DM
+                setTimeout(() => {
+                    addLog(`[OBS-Automation] ทริกเกอร์ส่งลิงก์ทักอินบ็อกซ์หา ${user} สำเร็จ! 💬`, "success");
+                    alert(`💬 [กล่องข้อความส่วนตัวจำลองของ ${user}]:\n\nสวัสดีค่ะ! ระบบกองสุขได้บันทึกการ CF999 ข้าวหอมมะลิเรียบร้อยแล้วค่ะ\nกรุณาชำระเงินค่าสินค้า 999 บาท\n(ลิงก์ชำระเงินจำลองเปิดขึ้นเรียบร้อยแล้วค่ะ)`);
+                    openModal();
+                }, 1000);
+            } else {
+                addLog(`[OBS-Automation] ส่งข้อความปฏิเสธหา ${user} เนื่องจากสินค้าหมดคลัง`, "alert");
+            }
+            updateVTuberSpeech();
+        }
+
+        // Modal triggers
+        function openModal() {
+            document.getElementById("paywallModal").classList.add("active");
+        }
+
+        function closeModal() {
+            document.getElementById("paywallModal").classList.remove("active");
+        }
+
+        function confirmPayment() {
+            const email = document.getElementById("leadEmail").value.trim();
+            if (!email || !email.includes("@gmail.com")) {
+                alert("❌ กรุณากรอกอีเมล Gmail (@gmail.com) ที่ถูกต้องเพื่อบันทึกข้อมูล Leads ในฐานข้อมูลลิขสิทธิ์กองสุข");
+                return;
+            }
+            
+            addLog(`[Google Lead Sync] ได้รับ Leads Gmail: ${email}`, "success");
+            addLog(`[Paywall-Success] ยืนยันยอดโอน 999 บาทออนไลน์สำเร็จ! ระบบ Pro ปลดล็อกถาวร`, "success");
+            
+            alert(`🎉 ขอขอบพระคุณเป็นอย่างยิ่งค่ะ!\nระบบได้ทำการซิงก์ข้อมูล Gmail: ${email} ขึ้นฐานข้อมูล และจำลองการปลดล็อกฟังก์ชัน Pro เรียบร้อยแล้วค่ะ!`);
+            closeModal();
+        }
+    </script>
+</body>
+</html>

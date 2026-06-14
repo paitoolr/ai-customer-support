@@ -7,7 +7,8 @@ $apps = @(
   "kongsuk-smart-air",
   "kongsuk-smartfarm-monitor",
   "kongsuk-soil-moisture-calculator",
-  "kongsuk-trading-dashboard"
+  "kongsuk-trading-dashboard",
+  "kongsuk-live-commerce-inventory"
 )
 
 $DIR = "C:\Users\Administrator\kongsuk-apps"
