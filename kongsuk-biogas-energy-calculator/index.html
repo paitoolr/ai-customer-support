@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Biogas Energy Calculator - กองสุข Empire</title>
+    <!-- นำเข้าฟอนต์ Outfit และ Sarabun จาก Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ========================================================
+           1. CORE DESIGN SYSTEM & VARIABLES
+           ======================================================== */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #071207 0%, #0d280d 50%, #020702 100%);
+            --glass-bg: rgba(15, 35, 15, 0.45);
+            --glass-border: rgba(50, 180, 50, 0.25);
+            --primary: #39ff14; /* Neon Green */
+            --primary-glow: 0 0 15px rgba(57, 255, 20, 0.6);
+            --text-main: #f0fff0;
+            --text-muted: #a0cfa0;
+            --card-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Background Grid Overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ========================================================
+           2. PREMIUM GLASS LAYOUT
+           ======================================================== */
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--card-glow), inset 0 0 15px rgba(57, 255, 20, 0.05);
+            animation: fadeIn 1s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header Style */
+        .app-header {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            background: rgba(57, 255, 20, 0.15);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            box-shadow: var(--primary-glow);
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffffff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .app-tagline {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* Premium Paywall Trigger Badge */
+        .pro-badge {
+            position: absolute;
+            top: -15px;
+            right: 0;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 18px;
+            border-radius: 50px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .pro-badge:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+        }
+
+        /* ========================================================
+           3. MAIN COMPUTATION AREA
+           ======================================================== */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-panel {
+            background: rgba(10, 25, 10, 0.3);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .range-slider {
+            flex-grow: 1;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .number-input {
+            width: 80px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .calc-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #2d8a2d 0%, #1e5c1e 100%);
+            border: 1px solid var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .calc-btn:hover {
+            background: var(--primary);
+            color: #000000;
+            box-shadow: var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Result Panel */
+        .result-panel {
+            background: rgba(10, 25, 10, 0.3);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(57, 255, 20, 0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .result-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .highlight-value {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+            font-size: 1.4rem;
+        }
+
+        /* ========================================================
+           4. LEAD GENERATION SECTION
+           ======================================================== */
+        .lead-section {
+            background: rgba(57, 255, 20, 0.03);
+            border: 1px solid rgba(57, 255, 20, 0.15);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .lead-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .lead-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        .lead-form {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lead-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            width: 250px;
+            outline: none;
+        }
+
+        .lead-btn {
+            background: var(--primary);
+            border: none;
+            color: #000;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lead-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--primary-glow);
+        }
+
+        /* ========================================================
+           5. PREMIUM PAYWALL MODAL
+           ======================================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: linear-gradient(135deg, #0d280d 0%, #050f05 100%);
+            border: 2px solid #ffd700;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            padding: 35px;
+            box-shadow: 0 0 35px rgba(255, 215, 0, 0.3);
+            text-align: center;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .paywall-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 50px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .paywall-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ffd700;
+            margin-bottom: 12px;
+        }
+
+        .paywall-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .qr-placeholder {
+            width: 180px;
+            height: 180px;
+            background: #ffffff;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* SVG วาดจำลองพร้อมเพย์ QR Code */
+        .qr-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .pay-details {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .pay-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .pay-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .file-upload-box {
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border 0.3s;
+        }
+
+        .file-upload-box:hover {
+            border-color: #ffd700;
+        }
+
+        .submit-slip-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            border: none;
+            color: #000;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .submit-slip-btn:hover {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Footer Style */
+        .app-footer {
+            margin-top: 25px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-overlay"></div>
+
+    <div class="app-container">
+        <!-- ปุ่มจำลองอัปเกรดโปรที่มุมขวาบน -->
+        <button class="pro-badge" id="paywall-trigger-btn" onclick="openPaywall()">👑 Upgrade PRO (999฿)</button>
+
+        <header class="app-header">
+            <span class="brand-badge">Kongsuk 2 (Sarabun - Biogas)</span>
+            <h1 class="app-title" id="main-title">Biogas Energy Calculator</h1>
+            <p class="app-tagline">เครื่องคำนวณและประมาณค่าประหยัดพลังงานจากระบบแก๊สชีวภาพกองสุข 2 สระบุรี</p>
+        </header>
+
+        <main class="calculator-grid">
+            <!-- ส่วนป้อนข้อมูล (Input Form) -->
+            <section class="input-panel">
+                <h2 class="panel-title">🌱 ตั้งค่าปริมาณวัตถุดิบรายวัน</h2>
+                
+                <div class="form-group">
+                    <label class="form-label" for="feedstock-select">ประเภทของวัตถุดิบดิบหมัก:</label>
+                    <select class="form-select" id="feedstock-select" onchange="calculateEnergy()">
+                        <option value="manure">มูลสัตว์ดิบ (มูลหมู/มูลวัว)</option>
+                        <option value="food_waste">เศษอาหารและเศษพืชอินทรีย์</option>
+                        <option value="mixed">สูตรผสม (มูลสัตว์ 70% + เศษอาหาร 30%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="weight-slider">ปริมาณวัตถุดิบรวมต่อวัน (กก./วัน):</label>
+                    <div class="range-container">
+                        <input type="range" class="range-slider" id="weight-slider" min="10" max="1000" value="100" oninput="updateWeightInput(this.value); calculateEnergy();">
+                        <input type="number" class="number-input" id="weight-input" min="10" max="1000" value="100" oninput="updateWeightSlider(this.value); calculateEnergy();">
+                    </div>
+                </div>
+
+                <button class="calc-btn" id="analyze-btn" onclick="triggerAnalyze()">🚀 ประมวลผลด้วยโมเดลวิทยาทาน</button>
+            </section>
+
+            <!-- ส่วนแสดงผลการประมวลผล (Output Card) -->
+            <section class="result-panel">
+                <h2 class="panel-title">📊 สรุปผลสัมฤทธิ์การประมวลผล</h2>
+                
+                <div class="result-item">
+                    <span class="result-label">ขนาดถังหมักที่แนะนำ (ลบ.ม.):</span>
+                    <span class="result-value" id="res-digester">2.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">ปริมาตรแก๊สมีเทนที่ผลิตได้ (ลบ.ม./วัน):</span>
+                    <span class="result-value" id="res-gas">5.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">พลังงานความร้อนเทียบเท่าก๊าซหุงต้ม LPG (กก./เดือน):</span>
+                    <span class="result-value" id="res-lpg">69.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">มูลค่าพลังงานต้มหุงที่ประหยัดได้สะสม:</span>
+                    <span class="result-value highlight-value" id="res-saving">1,035.00 บาท/เดือน</span>
+                </div>
+            </section>
+        </main>
+
+        <!-- ส่วนลงทะเบียนเก็บรายชื่อลูกค้า (Lead Generation) -->
+        <section class="lead-section">
+            <h3 class="lead-title">🌟 สมัครรับข้อมูลพิมพ์เขียวถังหมักโดมก๊าซชีวภาพฟรี!</h3>
+            <p class="lead-text">กรอกที่อยู่อีเมลของคุณเพื่อดาวน์โหลดแผนผังการก่อสร้างโรงหมักก๊าซแก๊สชีวภาพกองสุข 2 สระบุรีแบบละเอียด</p>
+            <div class="lead-form">
+                <input type="email" class="lead-input" id="lead-email" placeholder="กรอกอีเมลของคุณ (เช่น name@gmail.com)">
+                <button class="lead-btn" id="lead-submit-btn" onclick="submitLead()">ลงทะเบียนฟรี</button>
+            </div>
+        </section>
+
+        <footer class="app-footer">
+            <p>© 2026 Gongsuk Empire. All Rights Reserved. พัฒนาและเผยแพร่เป็นวิทยาทานแก่เกษตรกร</p>
+        </footer>
+    </div>
+
+    <!-- ========================================================
+         6. MODAL PAYWALL (ระบบอัปเกรด PRO)
+         ======================================================== -->
+    <div class="modal-overlay" id="paywall-modal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closePaywall()">×</button>
+            <span class="paywall-badge">PRO LEVEL UPGRADE</span>
+            <h2 class="paywall-title">อัปเกรดปลดล็อกสิทธิ์ PRO</h2>
+            <p class="paywall-desc">รับพิมพ์เขียวถังหมัก 100 ลบ.ม. การเชื่อมต่อออโตเมชันระบบปั๊ม และรับสคริปต์ Backtest บอตเทรด EA พิเศษทันที!</p>
+            
+            <!-- ส่วนสแกน QR Code จำลองพร้อมเพย์ -->
+            <div class="qr-placeholder">
+                <svg class="qr-svg" viewBox="0 0 100 100">
+                    <!-- จำลอง QR Code -->
+                    <rect x="0" y="0" width="100" height="100" fill="#fff"/>
+                    <rect x="10" y="10" width="25" height="25" fill="#000"/>
+                    <rect x="15" y="15" width="15" height="15" fill="#fff"/>
+                    <rect x="65" y="10" width="25" height="25" fill="#000"/>
+                    <rect x="70" y="15" width="15" height="15" fill="#fff"/>
+                    <rect x="10" y="65" width="25" height="25" fill="#000"/>
+                    <rect x="15" y="70" width="15" height="15" fill="#fff"/>
+                    <!-- ลวดลายบาร์โค้ดสุ่มตรงกลางและขอบ -->
+                    <rect x="45" y="20" width="10" height="10" fill="#000"/>
+                    <rect x="40" y="40" width="20" height="20" fill="#000"/>
+                    <rect x="70" y="45" width="10" height="25" fill="#000"/>
+                    <rect x="45" y="70" width="15" height="10" fill="#000"/>
+                    <text x="50" y="55" font-size="8" font-weight="bold" fill="#ffd700" text-anchor="middle">PRO</text>
+                </svg>
+            </div>
+
+            <div class="pay-details">
+                <div class="pay-row">
+                    <span>💳 พร้อมเพย์ (PromptPay):</span>
+                    <strong style="color: #ffd700;">081-234-5678 (กองสุข Empire)</strong>
+                </div>
+                <div class="pay-row">
+                    <span>💵 ยอดค่าสมัคร PRO Lifetime:</span>
+                    <strong style="color: #ffd700;">999.00 บาท</strong>
+                </div>
+            </div>
+
+            <!-- กล่องอัปโหลดไฟล์สลิปจำลอง -->
+            <div class="file-upload-box" onclick="simulateFileUpload()">
+                <span id="upload-status-text" style="color: var(--text-muted); font-size: 0.9rem;">📂 คลิกเลือกสลิปโอนเงินสมมติที่นี่เพื่อทดสอบระบบ...</span>
+            </div>
+
+            <button class="submit-slip-btn" id="slip-submit-btn" onclick="submitSlip()">ยืนยันการโอนเงิน (อัปเกรด PRO)</button>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         7. INTERACTIVE JAVASCRIPT LOGIC
+         ======================================================== */ -->
+    <script>
+        let runCount = 0;
+        let isPro = false;
+
+        function updateWeightInput(val) {
+            document.getElementById('weight-input').value = val;
+        }
+
+        function updateWeightSlider(val) {
+            // ป้องกันกรอกค่านอกขอบเขต
+            let cleanVal = Math.min(Math.max(val, 10), 1000);
+            document.getElementById('weight-slider').value = cleanVal;
+            document.getElementById('weight-input').value = cleanVal;
+        }
+
+        // ลอจิกการคำนวณแก๊สและพลังงาน
+        function calculateEnergy() {
+            const rawWeight = parseFloat(document.getElementById('weight-input').value) || 100;
+            const type = document.getElementById('feedstock-select').value;
+            
+            let gasYieldPerKg = 0.05; // ลบ.ม. ต่อ กก. (มูลสัตว์)
+            if (type === 'food_waste') {
+                gasYieldPerKg = 0.15; // เศษอาหารให้แก๊สเยอะกว่า
+            } else if (type === 'mixed') {
+                gasYieldPerKg = 0.08;
+            }
+
+            // 1. ขนาดถังหมักที่แนะนำ (อิงเวลาหมัก 30 วันและสัดส่วนน้ำ 1:1)
+            const dailyVolume = (rawWeight * 2) / 1000; // ลบ.ม.
+            const digesterSize = dailyVolume * 30; // ลบ.ม.
+
+            // 2. ปริมาณแก๊สต่อวัน
+            const dailyGas = rawWeight * gasYieldPerKg;
+
+            // 3. พลังงานความร้อนเทียบเท่าแก๊สหุงต้ม LPG ต่อเดือน (แก๊สชีวภาพ 1 ลบ.ม. เทียบเท่า LPG 0.46 กก.)
+            const monthlyLPGEquivalent = dailyGas * 0.46 * 30;
+
+            // 4. มูลค่าประหยัดได้ต่อเดือน (แก๊ส LPG กก.ละ 15 บาทโดยประมาณ)
+            const monthlySaving = monthlyLPGEquivalent * 15;
+
+            // พิมพ์ค่าลงหน้าจอ
+            document.getElementById('res-digester').innerText = digesterSize.toFixed(2);
+            document.getElementById('res-gas').innerText = dailyGas.toFixed(2);
+            document.getElementById('res-lpg').innerText = monthlyLPGEquivalent.toFixed(2);
+            document.getElementById('res-saving').innerText = monthlySaving.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' บาท/เดือน';
+        }
+
+        // วิเคราะห์จำลอง
+        function triggerAnalyze() {
+            if (!isPro) {
+                runCount++;
+                if (runCount >= 2) {
+                    alert("⚠️ คุณทดลองใช้งานครบโควตาฟรี 2 ครั้งแล้ว! กรุณาอัปเกรดเป็น PRO เพื่อรับสิทธิ์ใช้งานแบบไม่จำกัด");
+                    openPaywall();
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('analyze-btn');
+            btn.innerText = "🌀 กำลังวิเคราะห์ผลผ่านระบบ...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                calculateEnergy();
+                btn.innerText = "🚀 ประมวลผลด้วยโมเดลวิทยาทาน";
+                btn.disabled = false;
+                alert("🟢 ประมวลผลสถิติแก๊สชีวภาพกองสุข 2 สระบุรี สำเร็จเรียบร้อย!");
+            }, 1000);
+        }
+
+        // การลงทะเบียนเก็บข้อมูล Leads
+        function submitLead() {
+            const emailInput = document.getElementById('lead-email');
+            const email = emailInput.value.trim();
+            if (!email || !email.includes('@')) {
+                alert("❌ กรุณากรอกที่อยู่อีเมลของคุณให้ถูกต้องด้วยค่ะ");
+                return;
+            }
+
+            // แสดงข้อความส่งสำเร็จ
+            alert(`🎉 บันทึกการลงทะเบียนสำเร็จ! ระบบได้ทำการส่งซิงก์อีเมล ${email} เข้าคลังชีตวิทยาทานเรียบร้อยแล้วค่ะ`);
+            emailInput.value = '';
+        }
+
+        // ========================================================
+        // PAYWALL CONTROLS
+        // ========================================================
+        function openPaywall() {
+            document.getElementById('paywall-modal').classList.add('active');
+        }
+
+        function closePaywall() {
+            document.getElementById('paywall-modal').classList.remove('active');
+        }
+
+        let slipSelected = false;
+        function simulateFileUpload() {
+            slipSelected = true;
+            document.getElementById('upload-status-text').innerHTML = "🟢 <b>สลิปโอนเงิน (slip_mockup.png) โหลดสำเร็จ!</b> คลิกเพื่อเปลี่ยนไฟล์";
+            document.getElementById('upload-status-text').style.color = "#39ff14";
+        }
+
+        function submitSlip() {
+            if (!slipSelected) {
+                alert("❌ กรุณาคลิกเพื่ออัปโหลดสลิปโอนเงินจำลองก่อนยืนยันค่ะ");
+                return;
+            }
+
+            isPro = true;
+            closePaywall();
+
+            // อัปเกรดสถานะเป็นรุ่นโปรพรีเมียม
+            document.getElementById('paywall-trigger-btn').innerHTML = "👑 PRO LIFETIME ACTIVE";
+            document.getElementById('paywall-trigger-btn').style.background = "linear-gradient(135deg, #39ff14 0%, #1e5c1e 100%)";
+            document.getElementById('paywall-trigger-btn').style.boxShadow = "var(--primary-glow)";
+            document.getElementById('paywall-trigger-btn').style.color = "#ffffff";
+            document.getElementById('paywall-trigger-btn').disabled = true;
+
+            document.getElementById('main-title').innerHTML = "Biogas Energy Calculator <span style='color: #ffd700;'>[PRO]</span>";
+
+            alert("🎉 การอัปเกรดระดับ PRO สำเร็จแล้ว! ปลดล็อกฟังก์ชันประมวลผลไม่จำกัด และส่งออกพิมพ์เขียวถังหมักแบบละเอียดเรียบร้อยค่ะ");
+        }
+
+        // เริ่มต้นคำนวณค่าเริ่มต้นเมื่อโหลดเสร็จ
+        window.onload = function() {
+            calculateEnergy();
+        }
+    </script>
+</body>
+</html>

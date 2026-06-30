@@ -16,7 +16,8 @@ apps = [
     {"name": "Kongsuk Smart Air & PM2.5 💨", "desc": "ระบบเกณฑ์และแนะนำปรับตัวฝุ่นละออง AQI รายวัน", "url": "https://kongsuk-smart-air.pages.dev"},
     {"name": "Kongsuk Smartfarm Monitor 🚜", "desc": "แดชบอร์ดตรวจวัดสถานะโรงเรือนฟาร์มอัจฉริยะ", "url": "https://kongsuk-smartfarm-monitor.pages.dev"},
     {"name": "Kongsuk Soil Moisture Smart Calculator 💧", "desc": "ระบบคำนวณและตั้งเซนเซอร์วัดดินแห้ง-เปียก", "url": "https://kongsuk-soil-moisture-calculator.pages.dev"},
-    {"name": "Kongsuk Trading Dashboard 📊", "desc": "แดชบอร์ดรายงานผลสุขภาพพอร์ตสถิติซื้อขายออโต้", "url": "https://kongsuk-trading-dashboard.pages.dev"}
+    {"name": "Kongsuk Trading Dashboard 📊", "desc": "แดชบอร์ดรายงานผลสุขภาพพอร์ตสถิติซื้อขายออโต้", "url": "https://kongsuk-trading-dashboard.pages.dev"},
+    {"name": "Kongsuk AI VTuber Live Commerce & Inventory Simulator 🛒", "desc": "ระบบจำลองสตรีมสด AI VTuber และจัดการคลังสินค้าอัจฉริยะ", "url": "https://kongsuk-live-commerce-inventory.pages.dev"}
 ]
 
 # สร้างข้อความสำหรับ Telegram

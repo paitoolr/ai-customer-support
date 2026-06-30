@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kongsuk Smart Irrigation Dashboard - ระบบจัดการน้ำอัจฉริยะ</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #030712;
+    --card-bg: rgba(17, 24, 39, 0.6);
+    --border-color: rgba(59, 130, 246, 0.2);
+    --glow-color: rgba(59, 130, 246, 0.5);
+    --primary: #3b82f6;
+    --primary-glow: #1d4ed8;
+    --success: #10b981;
+    --accent: #f59e0b;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-primary) 70%);
+    font-family: 'Outfit', 'Noto Sans Thai', sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
+    padding: 30px 20px;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Header Section */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+  }
+  .brand h1 {
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .status-badge {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--success);
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Main Grid Layout */
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  /* Cards Design (Glassmorphism) */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(16px);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.1);
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Soil Sensors Controls */
+  .sensors-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .sensor-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+  }
+  .sensor-val {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 8px 0;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
+  }
+  .sensor-val.blue { color: #60a5fa; text-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+  .sensor-val.orange { color: #fb923c; text-shadow: 0 0 10px rgba(251, 146, 60, 0.4); }
+  .sensor-val.green { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
+  .sensor-label { font-size: 12px; color: var(--text-muted); }
+
+  /* Control Panel */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.02);
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .control-info h4 { font-size: 14px; font-weight: 600; }
+  .control-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Toggle Switch */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #374151;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 4px; bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--primary); }
+  input:checked + .slider:before { transform: translateX(24px); }
+
+  /* Calculator Section */
+  .calc-box {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+  .calc-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .select-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  select, input[type="number"] {
+    flex: 1;
+    background: #0b0f19;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+  }
+  .calc-btn {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s;
+  }
+  .calc-btn:hover {
+    box-shadow: 0 0 15px var(--glow-color);
+    transform: translateY(-1px);
+  }
+  .result-text { font-size: 14px; font-weight: 500; color: var(--success); margin-top: 14px; text-align: center; }
+
+  /* Lead Capture (Gmail) Block */
+  .lead-capture {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .lead-title { font-size: 16px; font-weight: 600; color: var(--success); margin-bottom: 8px; }
+  .lead-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
+  .input-group { display: flex; gap: 8px; }
+  input[type="email"] {
+    flex: 1;
+    background: #0b0f19;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+  }
+  .submit-btn {
+    background: var(--success);
+    border: none;
+    border-radius: 8px;
+    padding: 0 20px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .submit-btn:hover { box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+
+  /* Paywall Block */
+  .paywall-card {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+  }
+  .pro-badge {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .paywall-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .paywall-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+  .price-tag { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 20px; }
+  .price-tag span { font-size: 14px; color: var(--text-muted); font-weight: 400; text-decoration: line-through; margin-right: 6px; }
+  .pay-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s;
+  }
+  .pay-btn:hover {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Simulated Popup overlay for paywall */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s;
+    backdrop-filter: blur(8px);
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: #0f172a;
+    border: 1px solid var(--accent);
+    border-radius: 24px;
+    padding: 35px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="brand">
+      <h1>💧 Kongsuk Smart Irrigation</h1>
+      <p>ระบบควบคุมปั๊มน้ำชลประทานและประเมินความต้องการน้ำพืชอัจฉริยะ</p>
+    </div>
+    <div class="status-badge">🟢 อุปกรณ์ออนไลน์ (Sony Node)</div>
+  </header>
+
+  <!-- Lead Capture Block for Free Access -->
+  <div class="lead-capture" id="leadCaptureBlock">
+    <h3 class="lead-title">🎁 ปลดล็อกการใช้งานระบบพื้นฐานฟรี</h3>
+    <p class="lead-desc">สมัครใช้งานฟรีตลอดชีพวันนี้ด้วยบัญชี Gmail ของคุณ เพื่อเชื่อมต่อข้อมูลตรวจวัดปริมาณความชื้นดินผ่านเซ็นเซอร์ระบบกองสุข</p>
+    <div class="input-group">
+      <input type="email" id="gmailInput" placeholder="กรอกอีเมล Gmail ของคุณ (@gmail.com)" required>
+      <button class="submit-btn" onclick="submitLead()">ลงทะเบียนฟรี</button>
+    </div>
+    <p id="leadSuccessMsg" class="result-text" style="display:none;"></p>
+  </div>
+
+  <div class="grid">
+    <!-- Left Column (Dashboard Status and Calc) -->
+    <div class="left-col">
+      <div class="card" style="margin-bottom: 24px;">
+        <h3 class="card-title">📡 ข้อมูลเซ็นเซอร์ตรวจสอบสด (Real-time Sensors)</h3>
+        <div class="sensors-grid">
+          <div class="sensor-box">
+            <div class="sensor-val blue" id="soilMoistVal">42%</div>
+            <div class="sensor-label">ความชื้นดิน</div>
+          </div>
+          <div class="sensor-box">
+            <div class="sensor-val orange" id="tempVal">33°C</div>
+            <div class="sensor-label">อุณหภูมิอากาศ</div>
+          </div>
+          <div class="sensor-box">
+            <div class="sensor-val green" id="lightVal">85%</div>
+            <div class="sensor-label">แสงแดดปัจจุบัน</div>
+          </div>
+        </div>
+
+        <h3 class="card-title">🔌 อุปกรณ์สวิตช์สั่งรดน้ำ (Manual Controls)</h3>
+        <div class="controls">
+          <div class="control-row">
+            <div class="control-info">
+              <h4>💦 ปั๊มน้ำสปริงเกอร์หลัก (Sprinkler Pump)</h4>
+              <p>ระบบหัวฉีดรดน้ำสำหรับแปลงพืชแปลงที่ 1</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="sprinklerSwitch" onchange="toggleDevice('sprinkler')">
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="control-row">
+            <div class="control-info">
+              <h4>🔄 วาล์วน้ำหยดโซน 2 (Drip Valve Zone 2)</h4>
+              <p>ระบบประหยัดน้ำชลประทานอัจฉริยะโซนราก</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="dripSwitch" onchange="toggleDevice('drip')">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Water Need Calculator -->
+        <div class="calc-box">
+          <h4 class="calc-title">🧮 เครื่องคำนวณปริมาตรน้ำที่ต้องการตามชนิดพืช</h4>
+          <div class="select-group">
+            <select id="cropSelect">
+              <option value="rice">🌾 ข้าวนาปรัง</option>
+              <option value="sugarcane">🚜 อ้อยโรงงาน</option>
+              <option value="maize">🌱 ข้าวโพดเลี้ยงสัตว์</option>
+              <option value="cassava">🌿 มันสำปะหลัง</option>
+            </select>
+            <input type="number" id="areaInput" placeholder="จำนวนพื้นที่ (ไร่)" min="1" value="5">
+          </div>
+          <button class="calc-btn" onclick="calculateWater()">คำนวณปริมาณน้ำ</button>
+          <p id="calcResult" class="result-text" style="display:none;"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column (Pro Paywall) -->
+    <div class="right-col">
+      <div class="paywall-card">
+        <span class="pro-badge">PRO LEVEL</span>
+        <h3 class="paywall-title">ปลดล็อก Auto-Irrigation AI</h3>
+        <p class="paywall-desc">ปลดล็อกระบบรดน้ำอัตโนมัติอ้างอิงจากสภาพอากาศล่วงหน้าจำลอง และการซิงก์ข้อมูลสภาพความชื้นดินเพื่อรดน้ำแบบเหมาะสม 24 ชม. โดยอัตโนมัติ</p>
+        <div class="price-tag"><span>1,999 บาท</span> 999 บาท / ตลอดชีพ</div>
+        <button class="pay-btn" onclick="openPaywall()">อัปเกรดเป็นรุ่น PRO</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal simulation for Paywall and Leads -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h2 style="color:#f59e0b; margin-bottom: 12px;" id="modalTitle">🔒 ปลดล็อกฟีเจอร์ระดับ Pro</h2>
+    <p style="font-size: 14px; line-height: 1.5; color: var(--text-muted); margin-bottom: 24px;" id="modalBody">กรุณากรอกรหัสทำรายการชำระเงินหรือชำระผ่าน QR Code จำลองเพื่อปลดล็อกฟีเจอร์รดน้ำอัจฉริยะอัตโนมัติทันที</p>
+    <button class="calc-btn" onclick="closeModal()">ตกลง</button>
+  </div>
+</div>
+
+<script>
+  let isPro = false;
+  let isRegistered = false;
+
+  // Simulate Sensor variations
+  setInterval(() => {
+    if(!isRegistered) return;
+    const moist = Math.floor(40 + Math.random() * 15);
+    const temp = Math.floor(30 + Math.random() * 6);
+    const light = Math.floor(75 + Math.random() * 18);
+    document.getElementById('soilMoistVal').textContent = moist + "%";
+    document.getElementById('tempVal').textContent = temp + "°C";
+    document.getElementById('lightVal').textContent = light + "%";
+  }, 4000);
+
+  function submitLead() {
+    const email = document.getElementById('gmailInput').value.trim();
+    if(!email.endsWith('@gmail.com')) {
+      alert('❌ กรุณาใช้บัญชีอีเมลลงท้ายด้วย @gmail.com เท่านั้นครับ!');
+      return;
+    }
+    isRegistered = true;
+    document.getElementById('leadSuccessMsg').textContent = `🟢 ลงทะเบียนบัญชี ${email} เรียบร้อย! เปิดใช้งานระบบวิเคราะห์ดินจำลองแล้ว`;
+    document.getElementById('leadSuccessMsg').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('leadCaptureBlock').style.display = 'none';
+    }, 2500);
+  }
+
+  function toggleDevice(device) {
+    if(!isRegistered) {
+      alert('🔒 กรุณาลงทะเบียนบัญชี Gmail ของท่านเพื่อใช้สั่งการอุปกรณ์แปลงชลประทานครับ');
+      document.getElementById('sprinklerSwitch').checked = false;
+      document.getElementById('dripSwitch').checked = false;
+      return;
+    }
+    const state = document.getElementById(device + 'Switch').checked;
+    alert(`📶 ส่งคำสั่งเปิด/ปิดอุปกรณ์ [${device.toUpperCase()}] → สถานะปัจจุบัน: ${state ? 'เปิด (ON)' : 'ปิด (OFF)'}`);
+  }
+
+  function calculateWater() {
+    if(!isRegistered) {
+      alert('🔒 กรุณาลงทะเบียนใช้งานฟรีก่อนเริ่มต้นคำนวณความต้องการน้ำครับ');
+      return;
+    }
+    const crop = document.getElementById('cropSelect').value;
+    const area = parseFloat(document.getElementById('areaInput').value);
+    if(isNaN(area) || area <= 0) {
+      alert('กรุณากรอกพื้นที่ให้ถูกต้อง');
+      return;
+    }
+
+    let litersPerRai = 0;
+    let cropName = '';
+    switch(crop) {
+      case 'rice': litersPerRai = 1500; cropName = 'ข้าวนาปรัง'; break;
+      case 'sugarcane': litersPerRai = 900; cropName = 'อ้อยโรงงาน'; break;
+      case 'maize': litersPerRai = 700; cropName = 'ข้าวโพด'; break;
+      case 'cassava': litersPerRai = 500; cropName = 'มันสำปะหลัง'; break;
+    }
+
+    const totalWater = litersPerRai * area;
+    const resultEl = document.getElementById('calcResult');
+    resultEl.textContent = `💧 ปริมาณน้ำที่พืช [${cropName}] ในพื้นที่ ${area} ไร่ ต้องการรวมคือ: ${totalWater.toLocaleString()} ลิตรต่อวัน`;
+    resultEl.style.display = 'block';
+  }
+
+  function openPaywall() {
+    if(!isRegistered) {
+      alert('กรุณาลงทะเบียนใช้ระบบพื้นฐานฟรีก่อนทดลองอัปเดตเป็น Pro ครับ');
+      return;
+    }
+    const overlay = document.getElementById('modalOverlay');
+    document.getElementById('modalTitle').textContent = "👑 อัปเกรดระบบ Pro สำเร็จ!";
+    document.getElementById('modalBody').textContent = "ระบบจำลองปลดล็อก Auto-Irrigation AI เชื่อมการคำนวณข้อมูลดินอัจฉริยะสำเร็จเรียบร้อย สิทธิใช้งานระดับ Pro ปลดล็อกตลอดชีพมูลค่า 999 บาททำงานแล้ว!";
+    overlay.classList.add('active');
+    isPro = true;
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+</script>
+</body>
+</html>
