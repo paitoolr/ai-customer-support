@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Gold & Wealth Tracker - กองสุข Empire</title>
+    <!-- นำเข้าฟอนต์ Outfit และ Sarabun จาก Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ========================================================
+           1. CORE DESIGN SYSTEM & VARIABLES (GOLDEN GLASS THEME)
+           ======================================================== */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #120e07 0%, #28210d 50%, #070502 100%);
+            --glass-bg: rgba(35, 29, 15, 0.45);
+            --glass-border: rgba(212, 175, 55, 0.25);
+            --primary: #ffd700; /* Sunset Gold */
+            --primary-glow: 0 0 15px rgba(255, 215, 0, 0.6);
+            --text-main: #fffdf0;
+            --text-muted: #cfc2a0;
+            --card-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            --accent: #ff8c00; /* Dark Orange */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Background Grid Overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 215, 0, 0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 215, 0, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ========================================================
+           2. PREMIUM GLASS LAYOUT
+           ======================================================== */
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--card-glow), inset 0 0 15px rgba(255, 215, 0, 0.05);
+            animation: fadeIn 1s ease-out;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header Style */
+        .app-header {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            box-shadow: var(--primary-glow);
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .app-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        /* ========================================================
+           3. DYNAMIC CALCULATOR FORM & GRID
+           ======================================================== */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-card, .output-card {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .input-card:hover, .output-card:hover {
+            border-color: rgba(255, 215, 0, 0.25);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input, .input-wrapper select {
+            width: 100%;
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
+        }
+
+        .input-unit {
+            position: absolute;
+            right: 15px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        /* Results Display Styles */
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(255, 215, 0, 0.1);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 215, 0, 0.25);
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .result-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .result-val.highlight {
+            color: var(--primary);
+            text-shadow: var(--primary-glow);
+            font-size: 1.3rem;
+        }
+
+        /* ========================================================
+           4. VISUAL PROGRESS BAR & METER
+           ======================================================= */
+        .meter-container {
+            margin: 25px 0 10px 0;
+        }
+        
+        .meter-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            position: relative;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* ========================================================
+           5. PRESET REAL DATA ACTIONS
+           ======================================================== */
+        .preset-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-preset {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-preset:hover {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--primary-glow);
+        }
+
+        /* ========================================================
+           6. PRO PAYWALL MODAL & BUTTON
+           ======================================================== */
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border: none;
+            color: #120e07;
+            font-size: 1.1rem;
+            font-weight: 800;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: var(--primary-glow);
+            margin-top: 15px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+        }
+
+        /* Modal glass style */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(30, 25, 15, 0.95);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            max-width: 480px;
+            width: 90%;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+            animation: modalSlide 0.4s ease-out;
+            position: relative;
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--primary);
+        }
+
+        .qr-code-box {
+            background: #fff;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .qr-code-box img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Lead capture styling */
+        .lead-form-box {
+            margin: 30px 0 10px 0;
+            border-top: 1px solid rgba(255, 215, 0, 0.15);
+            padding-top: 25px;
+        }
+
+        .lead-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Footer styling */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-overlay"></div>
+
+    <div class="app-container">
+        <!-- Header Section -->
+        <div class="app-header">
+            <div class="brand-badge">SaaS App 17 • กองสุข Empire</div>
+            <h1 class="app-title">Kongsuk Gold & Wealth Tracker</h1>
+            <p class="app-subtitle">เครื่องคำนวณและวางแผนป้องกันความผันผวนทางการเงินด้วยพอร์ตทองคำอย่างสัตย์ซื่อ</p>
+        </div>
+
+        <!-- Presets Section with Real Data -->
+        <div class="preset-container">
+            <button class="btn-preset" onclick="setPreset(64100, 10, 5, 20)">ทองรูปพรรณวันนี้ (64,100 บาท/บาททอง)</button>
+            <button class="btn-preset" onclick="setPreset(43000, 5, 3, 15)">พอร์ตสะสมทองแท่งขนาดเล็ก</button>
+            <button class="btn-preset" onclick="setPreset(50000, 20, 8, 25)">เป้าหมายพอร์ตระยะยาวเพื่อครอบครัว</button>
+        </div>
+
+        <!-- Dynamic Calculator Grid -->
+        <div class="calc-grid">
+            
+            <!-- Left Side Inputs -->
+            <div class="input-card">
+                <h3 class="card-title">⚙️ ตั้งค่าปัจจัยจำลอง</h3>
+                
+                <div class="form-group">
+                    <label for="gold-price">ราคาทองคำวันนี้</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gold-price" value="64100" oninput="calculate()">
+                        <span class="input-unit">บาท/บาททอง</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gold-amount">ปริมาณที่ออมสะสม</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gold-amount" value="5" oninput="calculate()">
+                        <span class="input-unit">บาททอง</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inflation-rate">อัตราเงินเฟ้อเป้าหมาย</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="inflation-rate" value="3.5" step="0.1" oninput="calculate()">
+                        <span class="input-unit">% ต่อปี</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="holding-period">ระยะเวลาถือครอง</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="holding-period" value="10" oninput="calculate()">
+                        <span class="input-unit">ปี</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Outputs -->
+            <div class="output-card">
+                <h3 class="card-title">📊 ผลประเมินความยั่งยืน</h3>
+                
+                <div class="result-row">
+                    <span class="result-label">มูลค่าสินทรัพย์ทองคำปัจจุบัน</span>
+                    <span class="result-val" id="val-current">320,500 บาท</span>
+                </div>
+
+                <div class="result-row">
+                    <span class="result-label">มูลค่าหลังหักเงินเฟ้อสะสม</span>
+                    <span class="result-val" id="val-adjusted">227,204 บาท</span>
+                </div>
+
+                <div class="result-row">
+                    <span class="result-label">กำลังซื้อที่รักษาสถานะไว้ได้</span>
+                    <span class="result-val" id="val-retained">70.9%</span>
+                </div>
+
+                <!-- Visual Meter -->
+                <div class="meter-container">
+                    <div class="meter-bar">
+                        <div class="meter-fill" id="meter-fill-id" style="width: 71%;"></div>
+                    </div>
+                </div>
+
+                <div class="result-row">
+                    <span class="result-label">มูลค่าคุ้มครองกระแสการคลังคาดการณ์</span>
+                    <span class="result-val highlight" id="val-target">452,100 บาท</span>
+                </div>
+
+                <button class="btn-submit" onclick="openPaywall()">อัปเกรด PRO ปลดล็อก AI วิเคราะห์ราคาทอง</button>
+            </div>
+
+        </div>
+
+        <!-- Lead Form Area -->
+        <div class="lead-form-box">
+            <p class="lead-desc">✍️ ลงทะเบียนเพื่อบันทึกประวัติการวางแผนและรับสิทธิ์ทดลองใช้ฟรี 6 เดือน ผ่าน Gmail</p>
+            <div style="display: flex; gap: 10px; max-width: 500px; margin: 0 auto;">
+                <div class="input-wrapper" style="flex-grow: 1;">
+                    <input type="email" id="lead-email" placeholder="กรอกอีเมล Gmail ของคุณ">
+                </div>
+                <button class="btn-preset" onclick="submitLead()" style="border-radius: 10px; background: var(--primary); color: #120e07; font-weight: 600; padding: 10px 20px;">ลงทะเบียนใช้ฟรี</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Paywall Modal Dialog -->
+    <div class="modal" id="paywall-modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closePaywall()">&times;</span>
+            <div class="brand-badge" style="margin-bottom: 20px;">🔒 กองสุข Pro Lifetime Upgrade</div>
+            <h2 style="color: var(--primary); margin-bottom: 10px;">ปลดล็อกเครื่องมือเกรดกองทัพ</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">ปลดล็อกความแม่นยำด้วยกราฟ Real-time, ระบบ AI วิเคราะห์ราคาทองคำล่วงหน้า และบอตส่งสัญญาณความผันผวนรายนาที</p>
+            
+            <div class="qr-code-box">
+                <!-- QR Code โอนเงิน PromptPay จริงใจ 999 บาท -->
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PROMPT_PAY_PAYMENT_PAYLOAD_999_THB" alt="PromptPay QR Code">
+            </div>
+
+            <p style="font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-bottom: 8px;">ราคาอัปเกรด 999.00 THB</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 25px;">สแกนชำระผ่าน PromptPay และอัปเกรดอัตโนมัติทันที</p>
+            
+            <button class="btn-submit" onclick="confirmPayment()" style="margin-top: 0;">ฉันโอนเงินแล้ว</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>พัฒนาโดย <a href="https://kongsuk-empire-hub.pages.dev" target="_blank">กองสุข Empire</a> • นโยบายความเป็นส่วนตัวและความจริงใจทางการเงิน 100%</p>
+    </footer>
+
+    <script>
+        // ========================================================
+        // DYNAMIC CALCULATION LOGIC
+        // ========================================================
+        function calculate() {
+            const price = parseFloat(document.getElementById('gold-price').value) || 0;
+            const amount = parseFloat(document.getElementById('gold-amount').value) || 0;
+            const inflation = parseFloat(document.getElementById('inflation-rate').value) || 0;
+            const years = parseFloat(document.getElementById('holding-period').value) || 0;
+
+            // 1. Current value
+            const currentValue = price * amount;
+            document.getElementById('val-current').innerText = currentValue.toLocaleString('th-TH') + ' บาท';
+
+            // 2. Inflation adjusted value
+            // formula: adjusted = current / (1 + inf/100)^years
+            const divisor = Math.pow(1 + (inflation / 100), years);
+            const adjustedValue = currentValue / divisor;
+            document.getElementById('val-adjusted').innerText = Math.round(adjustedValue).toLocaleString('th-TH') + ' บาท';
+
+            // 3. Retained purchasing power (%)
+            let retained = divisor > 0 ? (100 / divisor) : 0;
+            retained = Math.min(100, Math.max(0, retained));
+            document.getElementById('val-retained').innerText = retained.toFixed(1) + '%';
+            document.getElementById('meter-fill-id').style.width = retained.toFixed(1) + '%';
+
+            // 4. Forecast value to preserve wealth
+            // target = current * (1 + inf/100)^years
+            const forecastValue = currentValue * divisor;
+            document.getElementById('val-target').innerText = Math.round(forecastValue).toLocaleString('th-TH') + ' บาท';
+        }
+
+        // Preset Setter
+        function setPreset(price, amount, inflation, years) {
+            document.getElementById('gold-price').value = price;
+            document.getElementById('gold-amount').value = amount;
+            document.getElementById('inflation-rate').value = inflation;
+            document.getElementById('holding-period').value = years;
+            calculate();
+        }
+
+        // ========================================================
+        // INTERACTIVE MODAL & PAYWALL ACTIONS
+        // ========================================================
+        function openPaywall() {
+            document.getElementById('paywall-modal').style.display = 'flex';
+        }
+
+        function closePaywall() {
+            document.getElementById('paywall-modal').style.display = 'none';
+        }
+
+        function confirmPayment() {
+            alert('ขอบคุณที่ร่วมเป็นส่วนหนึ่งของระบบอัปเกรด PRO ของกองสุข Empire! ระบบตรวจสอบจะทำการยืนยันบัญชีและสลิปอย่างเร็วที่สุดภายใน 5 นาทีค่ะ');
+            closePaywall();
+        }
+
+        // Lead submission
+        function submitLead() {
+            const email = document.getElementById('lead-email').value.trim();
+            if (!email.endsWith('@gmail.com')) {
+                alert('กรุณากรอกที่อยู่อีเมล Gmail ที่ถูกต้องเพื่อความเสถียรของระบบคลังและสิทธิ์ฟรีค่ะ!');
+                return;
+            }
+            alert('ลงทะเบียนที่อยู่อีเมล ' + email + ' สำเร็จแล้ว! คุณได้รับสิทธิ์ทดลองใช้ Gold & Wealth Tracker ฟรี 6 เดือนแล้วค่ะ');
+        }
+
+        // Run initial calculation on load
+        calculate();
+    </script>
+</body>
+</html>
