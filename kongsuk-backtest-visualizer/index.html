@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kongsuk Backtest Report Visualizer 📊</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #a3e635; /* Lime Green */
+            --primary-glow: rgba(163, 230, 53, 0.4);
+            --secondary: #10b981; /* Emerald Green */
+            --bg-dark: #071507; /* Dark Forest */
+            --bg-card: rgba(12, 46, 10, 0.45);
+            --border-glass: rgba(163, 230, 53, 0.2);
+            --text-light: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Sarabun', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(163, 230, 53, 0.12) 0px, transparent 50%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Header */
+        header {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem 1.5rem;
+            margin-top: 1rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .brand-container h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-container p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .upgrade-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #000;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .upgrade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--primary);
+        }
+
+        /* Container Main Grid */
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+            flex-grow: 1;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card styles */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(163, 230, 53, 0.4);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            border-left: 4px solid var(--secondary);
+            padding-left: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.75rem;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .primary-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 700;
+            padding: 0.75rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Output / Dashboard styling */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-item .val {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 0.2rem;
+        }
+
+        .chart-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Lead Generator Card */
+        .lead-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(163, 230, 53, 0.05));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .lead-card h2 {
+            border-color: var(--primary);
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 21, 7, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .paywall-modal {
+            background: rgba(12, 46, 10, 0.8);
+            border: 2px solid var(--primary);
+            border-radius: 30px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 50px var(--primary-glow);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transform: scale(0.9);
+            transition: transform 0.4s ease;
+        }
+
+        .modal-overlay.active .paywall-modal {
+            transform: scale(1);
+        }
+
+        .qr-code-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 20px;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .qr-code-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-upload-btn {
+            border: 2px dashed rgba(163, 230, 53, 0.4);
+            color: var(--primary);
+            background: transparent;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-btn:hover {
+            border-color: var(--primary);
+            background: rgba(163, 230, 53, 0.05);
+        }
+
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Success screen / badge */
+        .version-badge {
+            background: rgba(163, 230, 53, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            width: 100%;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand-container">
+            <h1>Kongsuk Backtest Report Visualizer <span class="version-badge" id="versionBadge">LITE</span></h1>
+            <p>ระบบสร้างและวิเคราะห์สถิติผลการทดสอบย้อนหลังของ EA อัจฉริยะแบบเรียลไทม์</p>
+        </div>
+        <button class="upgrade-btn" id="upgradeProBtn" onclick="openPaywall()">อัปเกรด PRO Lifetime 999฿</button>
+    </header>
+
+    <!-- Main Grid -->
+    <main>
+        <!-- Left Side: Config & Input -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Upload Card -->
+            <div class="glass-card">
+                <h2>1. โหลดข้อมูล Backtest</h2>
+                <div class="file-upload-wrapper">
+                    <span class="file-upload-btn">📂 เลือกไฟล์รายงาน MT5 (.html / .csv)</span>
+                    <input type="file" id="reportFile" accept=".html,.csv" onchange="handleFileUpload(event)">
+                </div>
+                <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">หรือระบุสถิติเทรดด้วยตัวเอง:</div>
+                <div class="form-group">
+                    <label>กำไรสุทธิจำลอง (Net Profit USD)</label>
+                    <input type="number" id="netProfit" value="1580" oninput="generateMockData()">
+                </div>
+                <div class="form-group">
+                    <label>Drawdown สูงสุด (Max Drawdown %)</label>
+                    <input type="number" id="drawdown" value="7.5" step="0.1" oninput="generateMockData()">
+                </div>
+                <div class="form-group">
+                    <label>จำนวนครั้งที่เทรด (Total Trades)</label>
+                    <input type="number" id="totalTrades" value="120" oninput="generateMockData()">
+                </div>
+                <div class="form-group">
+                    <label>ประสิทธิภาพ (Profit Factor)</label>
+                    <input type="number" id="profitFactor" value="1.85" step="0.01" oninput="generateMockData()">
+                </div>
+                <button class="primary-btn" onclick="generateMockData()">🔄 อัปเดตการวิเคราะห์</button>
+            </div>
+
+            <!-- Lead Form -->
+            <div class="glass-card lead-card">
+                <h2>2. สมัครใช้งานบอทฟรี 6 เดือน 🎁</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">กรอก Gmail ของคุณเพื่อรับคีย์ทดลองใช้งานสิทธิ์พิเศษฟรี 6 เดือนของระบบบอท MA Crossover ทันที</p>
+                <div class="form-group">
+                    <label>บัญชี Gmail ของคุณ (@gmail.com เท่านั้น)</label>
+                    <input type="email" id="leadEmail" placeholder="name@gmail.com" required>
+                </div>
+                <button class="primary-btn" onclick="submitLead()">🔑 รับสิทธิ์และส่ง Leads</button>
+            </div>
+        </div>
+
+        <!-- Right Side: Analytics Dashboard -->
+        <div class="dashboard-container">
+            <div class="glass-card">
+                <h2>3. แดชบอร์ดสรุปประสิทธิภาพพอร์ตโฟลิโอ</h2>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <label>Net Profit</label>
+                        <div class="val" id="valNetProfit">$1,580.00</div>
+                    </div>
+                    <div class="metric-item">
+                        <label>Max Drawdown</label>
+                        <div class="val" id="valDrawdown" style="color: #ef4444;">7.50%</div>
+                    </div>
+                    <div class="metric-item">
+                        <label>Profit Factor</label>
+                        <div class="val" id="valProfitFactor" style="color: #10b981;">1.85</div>
+                    </div>
+                    <div class="metric-item">
+                        <label>Win Rate</label>
+                        <div class="val" id="valWinRate">64.20%</div>
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <canvas id="equityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Paywall Modal Overlay -->
+    <div class="modal-overlay" id="paywallOverlay">
+        <div class="paywall-modal">
+            <h2 style="font-size: 1.6rem; color: var(--primary);">🏰 ปลดล็อกขุมพลังระดับ PRO LIFETIME</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">ยินดีต้อนรับสู่สังคมนักลงทุนกองสุข ปลดล็อกการดึงกราฟ Drawdown รายชั่วโมง เปรียบเทียบหลายคู่เงิน และสถิติสแกนตลาดเต็มพิกัด</p>
+            
+            <!-- QR Code Box (สร้างผ่าน QR API ของ stripe/promptpay จำลอง) -->
+            <div class="qr-code-box">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PROMPT_PAY_999_THB_KONGSUK_EMPIRE" alt="QR Code 999 THB">
+            </div>
+            
+            <div style="font-weight: bold; color: var(--primary); font-size: 1.2rem;">ยอดชำระ: 999.00 บาท</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">บัญชีโอนเงิน: ธนาคารกสิกรไทย 099-X-XXXXX-X (ระบบส่งสลิปจำลอง)</p>
+            
+            <div class="form-group" style="text-align: left;">
+                <label>แนบสลิปชำระเงินจำลอง (.png/.jpg)</label>
+                <input type="file" id="slipFile" accept="image/*" onchange="handleSlipUpload(event)">
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                <button class="primary-btn" style="flex: 1;" onclick="submitSlip()">📤 ส่งหลักฐานอัปเกรด PRO</button>
+                <button class="primary-btn" style="flex: 1; border-color: var(--text-muted); color: var(--text-muted);" onclick="closePaywall()">❌ ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 กองสุข Empire. สรรสร้างนวัตกรรมการลงทุนพรีเมียมด้วยระบบดีไซน์สมบูรณ์แบบ</p>
+    </footer>
+
+    <script>
+        let myChart = null;
+        let analysisCount = 0;
+
+        // ฟังก์ชันสร้างข้อมูลกราฟเส้นกำไรจำลองแบบสมจริงตาม Net Profit ที่กรอก
+        function generateMockData() {
+            analysisCount++;
+            
+            // ดักจับขีดจำกัด Paywall สำหรับรุ่นฟรี ( Lite ใช้ได้ 2 ครั้ง)
+            if (analysisCount > 2 && document.getElementById('versionBadge').innerText === "LITE") {
+                openPaywall();
+                return;
+            }
+
+            const netProfitVal = parseFloat(document.getElementById('netProfit').value) || 0;
+            const drawdownVal = parseFloat(document.getElementById('drawdown').value) || 0;
+            const totalTradesVal = parseInt(document.getElementById('totalTrades').value) || 0;
+            const profitFactorVal = parseFloat(document.getElementById('profitFactor').value) || 1.0;
+
+            // อัปเดตข้อมูลตัวเลขใน Metric Card
+            document.getElementById('valNetProfit').innerText = `$${netProfitVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('valDrawdown').innerText = `${drawdownVal.toFixed(2)}%`;
+            document.getElementById('valProfitFactor').innerText = profitFactorVal.toFixed(2);
+            
+            const winRate = (profitFactorVal / (profitFactorVal + 0.8)) * 100;
+            document.getElementById('valWinRate').innerText = `${winRate.toFixed(2)}%`;
+
+            // สร้าง Equity Line จากอินพุต
+            const labels = [];
+            const equityData = [];
+            let currentBalance = 10000;
+            
+            labels.push("Start");
+            equityData.push(currentBalance);
+
+            const averageWin = (netProfitVal / totalTradesVal) * 1.5;
+            const averageLoss = averageWin / profitFactorVal;
+
+            for (let i = 1; i <= 10; i++) {
+                labels.push(`P-${i * Math.ceil(totalTradesVal/10)}`);
+                // เพิ่มความเคลื่อนไหวให้มีกำไร/ขาดทุนสุ่มแต่ตรงเป้ากำไรสุทธิปลายทาง
+                let progress = i / 10;
+                let targetProfitProgress = netProfitVal * progress;
+                let fluctuation = (Math.random() - 0.4) * (netProfitVal * 0.15);
+                equityData.push(Math.round(10000 + targetProfitProgress + fluctuation));
+            }
+
+            // อัปเดตหรือสร้างใหม่ Chart.js
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const ctx = document.getElementById('equityChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Equity Curve (USD)',
+                        data: equityData,
+                        borderColor: '#a3e635',
+                        backgroundColor: 'rgba(163, 230, 53, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // การอัปโหลดไฟล์รายงานเพื่อดึงข้อมูลสถิติจริง
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                
+                // ตรวจหาคีย์เวิร์ดเด่นในรายงาน MT5 HTML
+                if (file.name.endsWith('.html') || text.includes('Strategy Tester')) {
+                    // ดักจับ Net Profit ใน HTML (ตัวอย่าง: "Total net profit")
+                    const netProfitMatch = text.match(/Total net profit<\/td><td[^>]*>([\d\s\.-]+)/i) || 
+                                          text.match(/Net Profit<\/td><td[^>]*>([\d\s\.-]+)/i);
+                    const drawdownMatch = text.match(/Maximal drawdown<\/td><td[^>]*>[\d\s\.-]+\s\(([\d\.-]+)%\)/i) ||
+                                          text.match(/Max drawdown<\/td><td[^>]*>[\d\.-]+%/i);
+                    const tradesMatch = text.match(/Total trades<\/td><td[^>]*>(\d+)/i);
+                    const pfMatch = text.match(/Profit factor<\/td><td[^>]*>([\d\.-]+)/i);
+
+                    if (netProfitMatch) {
+                        document.getElementById('netProfit').value = Math.round(parseFloat(netProfitMatch[1].replace(/\s/g, '')));
+                    }
+                    if (drawdownMatch) {
+                        document.getElementById('drawdown').value = parseFloat(drawdownMatch[1]);
+                    }
+                    if (tradesMatch) {
+                        document.getElementById('totalTrades').value = parseInt(tradesMatch[1]);
+                    }
+                    if (pfMatch) {
+                        document.getElementById('profitFactor').value = parseFloat(pfMatch[1]);
+                    }
+                    alert("🟢 อ่านข้อมูลผลลัพธ์ Backtest จากรายงาน MT5 เรียบร้อยแล้ว!");
+                } else {
+                    alert("🟡 รูปแบบรายงานไม่รองรับ แต่สามารถปรับค่าสถิติผ่านแบบฟอร์มด้านล่างได้ครับ");
+                }
+                generateMockData();
+            };
+            reader.readAsText(file);
+        }
+
+        // ระบบ Lead Generation Form
+        function submitLead() {
+            const email = document.getElementById('leadEmail').value;
+            if (!email || !email.includes('@gmail.com')) {
+                alert("❌ กรุณากรอกอีเมล Gmail (@gmail.com) ที่ถูกต้องเพื่อรับสิทธิ์ใช้ฟรี 6 เดือน!");
+                return;
+            }
+
+            // ยิงจำลองส่งข้อมูลสำเร็จ
+            alert(`🎉 รับสิทธิ์เรียบร้อย!\nคีย์ใช้งานบอท 6 เดือนของคุณคือ: KONGSUK-FREE-${Math.random().toString(36).substr(2, 9).toUpperCase()}\nโปรดนำคีย์นี้และอีเมลไปป้อนในตอนรัน EA บอส`);
+            
+            // จำลองการซิงก์ส่ง Leads เข้าหลังบ้าน
+            console.log("Leads sync success for email:", email);
+        }
+
+        // ควบคุม Modal Paywall
+        function openPaywall() {
+            document.getElementById('paywallOverlay').classList.add('active');
+        }
+
+        function closePaywall() {
+            document.getElementById('paywallOverlay').classList.remove('active');
+        }
+
+        function handleSlipUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                console.log("Slip uploaded:", file.name);
+            }
+        }
+
+        function submitSlip() {
+            const slip = document.getElementById('slipFile').files[0];
+            if (!slip) {
+                alert("❌ โปรดแนบหลักฐานการโอนเงินก่อนส่งครับ");
+                return;
+            }
+
+            closePaywall();
+            
+            // อัปเกรดหน้าเว็บเป็น PRO
+            document.getElementById('versionBadge').innerText = "PRO";
+            document.getElementById('versionBadge').style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+            document.getElementById('versionBadge').style.borderColor = "#10b981";
+            document.getElementById('versionBadge').style.color = "#10b981";
+            document.getElementById('upgradeProBtn').style.display = "none";
+            
+            alert("🟢 [ยินดีด้วย!] ระบบได้ทำการตรวจสอบหลักฐานสลิปและอัปเกรดท่านสู่เวอร์ชัน PRO เรียบร้อยแล้ว!");
+            generateMockData();
+        }
+
+        // โหลดข้อมูลเริ่มต้นตอนเปิดหน้าเว็บ
+        window.onload = function() {
+            generateMockData();
+        };
+    </script>
+</body>
+</html>

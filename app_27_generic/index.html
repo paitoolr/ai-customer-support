@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กองสุข Empire - ระบบปัญญาประดิษฐ์พรีเมียม</title>
+    <style>
+        :root {
+            --bg-color: #0d1e11;
+            --accent-color: #4caf50;
+            --text-color: #e0f2f1;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            background: linear-gradient(135deg, #09140b 0%, #15361a 100%);
+            color: var(--text-color);
+            font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        h1 {
+            color: #81c784;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .tag {
+            background: rgba(76, 175, 80, 0.2);
+            color: #81c784;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #a5d6a7;
+        }
+        .pro-badge {
+            font-weight: bold;
+            color: #ffd54f;
+        }
+        .btn {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            border: 1px solid #81c784;
+            color: #fff;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <span class="tag">🤖 วิวัฒนาการอัตโนมัติ (Auto-Evolved app_27)</span>
+        <h1>กองสุข Smart Farm Hub</h1>
+        <p class="content">
+            ประมวลผลกระแสเทรนด์ปัจจุบัน: <b>ระบบปัญญาประดิษฐ์พรีเมียม</b><br>
+            ระบบคำนวณและประมวลผลคาร์บอนเครดิตผ่าน Smart Contract อัจฉริยะ 
+            จำกัดการใช้งานฟรีผ่านบัญชี Gmail นาน 6 เดือน หรืออัปเกรดเป็นระดับ <span class="pro-badge">PRO ในราคา 999 บาท</span> เพื่อปลดล็อกฟังก์ชันวิเคราะห์เชิงลึกทั้งหมด
+        </p>
+        <button class="btn">🚀 ลงทะเบียนเข้าใช้ระบบฟรี</button>
+    </div>
+</body>
+</html>
